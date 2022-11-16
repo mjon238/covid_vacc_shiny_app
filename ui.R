@@ -40,17 +40,26 @@ shinyUI(
      ')),
 
       ## End create title text
-
-      ## Create Tabs
       tabsetPanel(
         type = "tabs",
-        tabPanel(
-          "Takings",
-          titlePanel("Vision"),
+        
+        ##Tab Panel 1
+        tabPanel("Takings",
+          #Add and edit text output
+          textOutput(outputId = "graphTitle"),
+          tags$head(tags$style("#graphTitle{color: black;
+                                 font-size: 20px;
+                                 }"
+          )
+        ),
+        
+        #Add Mainpanel body text
           mainPanel(
             plotOutput(outputId = "distPlot")
           )
         ),
+        
+        ## Tab Panel 2
         tabPanel("CPI", )
       )
     ),
