@@ -16,7 +16,7 @@ function(input, output) {
   output$graphTitle <- renderText({
     title <- switch(input$items,
       "vacc" = "Fully Vaccinated NZ",
-      "vaccDHB" = "Fully Vaccinated by DHB",
+      "vaccDHB" = "Fully Vaccinated by DHB (Not Functional Yet).",
       "ratio" = "Rate Ratios",
       "ratio2" = "Rate Ratios Comparison"
     )
@@ -70,9 +70,12 @@ function(input, output) {
                         "maori" = "Maori Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
                         "nmaori" = "Non-Maori Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)")
     
-    
+    ratioColour  <- switch(input$ethnicity,
+                           "nmaori"= "#06b73c",
+                           "total" = "#639bfb", 
+                           "maori" = "#fb746c")
     figRatio <- ggplot(dataRatio, aes(x=factor(AgeGroup, level= level_order), y = RelativeRisk, fill=RelativeRisk))+
-      geom_col(fill = "Steel Blue 2")+
+      geom_col(fill = ratioColour)+
       geom_errorbar(aes(min=RelativeRiskLwr, ymax=RelativeRiskUpr), width=0.5) +
       plot_annotation(title = titlePlot) +
       labs(y= "Rate Ratio",
@@ -104,8 +107,8 @@ output$ratioComparsion <- renderPlot({
     plot_annotation(title = "Fully Vaccinated Rate Ratio by Age Group & Ethnicity (HSU as baseline)") +
     labs(y= "Rate Ratio",
          x= "Age Groups")+
-    scale_fill_discrete(name = "Population")+ 
-    scale_fill_manual(values = c("#06b73c","#639bfb", "#fb746c")) &
+    scale_fill_manual(values = c("Non-Maori"= "#06b73c","Total" = "#639bfb", "Maori" = "#fb746c"),
+                      name = "Population") &
     
     theme(
       plot.title = element_text(hjust = 0.5),
