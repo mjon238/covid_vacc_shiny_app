@@ -5,20 +5,20 @@
 # Step 4: Run the following code for Total Pop (Not Male/Female)
 
 DHBData <- list(
-  Total = list(
+  # Total = list(
     HSU = list(
       Total = HSU_TFVacc_nontot.df,
       Maori = HSU_MFVacc_nontot.df,
-      NMaori = HSU_NMFVacc_nontot.df
+      `Non-Maori` = HSU_NMFVacc_nontot.df
     ),
     ERP = list(
       Total = ERP_TFVacc_nontot.df,
       Maori = ERP_MFVacc_nontot.df,
-      NMaori = ERP_NMFVacc_nontot.df
+      `Non-Maori` = ERP_NMFVacc_nontot.df
     )
-  ),
-  Male = ,
-  Female =
+  # )
+  # Male = ,
+  # Female =
   )
 
 FullyVaccData <- list(
@@ -29,5 +29,5 @@ FullyVaccData <- list(
 RatioRatesData <- list(
   Total = TFVacc_DHBpopulation,
   Maori = MFVacc_DHBpopulation,
-  NMaori = NMFVacc_DHBpopulation
+  `Non-Maori` = NMFVacc_DHBpopulation
 )

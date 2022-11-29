@@ -1,8 +1,9 @@
 # UI
+ fillPage(
 shinyUI(
   dashboardPage(
     title = "",
-
+    
     ## Sidebar Section
     dashboardHeader(
       title = "COVID-19 Vaccination"
@@ -42,6 +43,16 @@ shinyUI(
                                       input.vaccType == 'By DHB'",
         hr(),
         div(style = "margin-bottom: -20px;"),
+        useShinyjs(),
+        # hidden(
+        
+        selectInput(inputId = "groupDHB",
+                          label = "Select DHB Groups",
+                          choices = c("Custom", "High vs. Low", 
+                                      "Auckland Region", "North Island",
+                                      "South Island"),
+                          selected = "Custom",
+                    selectize = F),
         pickerInput(
           inputId = "DHB",
           label = "Select DHB",
@@ -83,24 +94,24 @@ shinyUI(
           id = "vaccType",
           tabPanel(
             "Nationwide",
-            plotlyOutput("fullyVaccPlot", width = "800px"),
+            br(),
+            plotlyOutput("fullyVaccPlot", width = "800px", height = "400px"),
             radioGroupButtons(
               inputId = "ethFull",
               label = "Select Ethnicity",
-              choiceNames = c("Total", "Maori"),
-              choiceValues = c("total", "maori"),
-              selected = "total"
+              choices = c("Total", "Maori"),
+              selected = "Total"
             )
           ),
           tabPanel(
             "By DHB",
-            plotlyOutput("plotDHB", width = "800px"),
+            br(),
+            plotlyOutput("plotDHB", width = "800px", height = "400px"),
             radioGroupButtons(
               inputId = "ethDHB",
               label = "Select Ethnicity",
-              choiceNames = c("Total", "Maori", "Non-Maori"),
-              choiceValues = c("total", "maori", "nmaori"),
-              selected = "total"
+              choices = c("Total", "Maori", "Non-Maori"),
+              selected = "Total"
             )
           )
         )
@@ -117,17 +128,18 @@ shinyUI(
           id = "ratioTabs",
           tabPanel(
             "Single",
+            br(),
             plotlyOutput("rateRatioPlot", width = "800px"),
             radioGroupButtons(
               inputId = "ethRatio",
               label = "Select Ethnicity",
-              choiceNames = c("Total", "Maori", "Non-Maori"),
-              choiceValues = c("total", "maori", "nmaori"),
-              selected = "total"
+              choices = c("Total", "Maori", "Non-Maori"),
+              selected = "Total"
             )
           ),
           tabPanel(
             "Comparison",
+            br(),
             plotlyOutput("ratioComparsion", width = "800px"),
             checkboxGroupButtons(
               inputId = "eth2",
@@ -140,4 +152,5 @@ shinyUI(
       )
     )
   )
+)
 )

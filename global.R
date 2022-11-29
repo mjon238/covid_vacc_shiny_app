@@ -17,7 +17,27 @@ load("data/Full Vacc/Total Fully Vaccinated rates using HSU and ERP, by national
 load("data/Full Vacc/Maori Fully Vaccinated rates using HSU and ERP, by national total (DHB=total).Rda")
 
 # DHB Tab
-load("data/Full_Vacc_By_DHB_All.Rda")
+# load("data/Full_Vacc_By_DHB_All.Rda")
+load("data/Full Vacc/DHB Data/HSU/HSU_Total_Vacc_DHB.Rda")
+load("data/Full Vacc/DHB Data/HSU/HSU_Maori_Vacc_DHB.Rda")
+load("data/Full Vacc/DHB Data/HSU/HSU_Non_Maori_Vacc_DHB.Rda")
+load("data/Full Vacc/DHB Data/ERP/ERP_Total_Vacc_DHB.Rda")
+load("data/Full Vacc/DHB Data/ERP/ERP_Maori_Vacc_DHB.Rda")
+load("data/Full Vacc/DHB Data/ERP/ERP_Non_Maori_Vacc_DHB.Rda")
+
+
+DHBData <- list(
+    HSU = list(
+      Total = HSU_TFVacc_nontot.df,
+      Maori = HSU_MFVacc_nontot.df,
+      `Non-Maori` = HSU_NMFVacc_nontot.df
+    ),
+    ERP = list(
+      Total = ERP_TFVacc_nontot.df,
+      Maori = ERP_MFVacc_nontot.df,
+      `Non-Maori` = ERP_NMFVacc_nontot.df
+    )
+  )
 
 # Rate Rates Tab
 load("data/Rate Ratio/Maori Rate ratio for Fully Vaccinated Rates by grouped DHB with 95% CI's.Rda")
@@ -41,3 +61,7 @@ listOfDHB <- c(
   "South Canterbury", "Tairawhiti", "Taranaki", "Waikato",
   "Wairarapa", "Waitemata", "West Coast", "Whanganui"
 )
+
+
+
+
