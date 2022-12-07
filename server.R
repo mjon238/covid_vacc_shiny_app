@@ -1,8 +1,17 @@
 # Server
 function(input, output) {
-
-  # largestDHB <- reactiveVal()
-    
+  
+  #Title -----
+  output$graphTitle <- renderText({
+    title <- switch(input$items,
+                    "vacc" = "Fully Vaccinated",
+                    "ratio" = "Rate Ratios",
+                    "ratio2" = "Rate Ratios Comparison"
+    )
+    paste(title)
+  })
+  
+  #Creating reactive values -----
   DHBSelected <- reactiveValues()
   
   observe({
@@ -20,29 +29,20 @@ function(input, output) {
     minDHB <- minDHB[[1,1]]
     
     DHBSelected$DHB = switch(input$groupDHB,
-                            "High vs. Low" = c(maxDHB, minDHB),
-                            "Custom" = input$DHB,
+                             "All" = listOfDHB,
+                            "Select DHB\'s" = input$DHB,
                             "Auckland Region" = c("Auckland", "Waitemata",
                                          "Counties Manukau"),
+                            "Wellington Region" = c("Capital and Coast", "Hutt Valley"),
                             "North Island" = c(
                               "Auckland", "Bay of Plenty", "Capital and Coast",
                               "Counties Manukau", "Hawkes Bay", "Hutt Valley", "Lakes",
                               "MidCentral", "Northland", "Tairawhiti", "Taranaki", "Waikato",
                               "Wairarapa", "Waitemata", "Whanganui"),
                             "South Island" = c("Canterbury", "Nelson Marlborough", "Southern",         
-                                                "South Canterbury", "West Coast" ) 
+                                                "South Canterbury", "West Coast" ),
+                            "High vs. Low" = c(maxDHB, minDHB)
     )
-    # if(input$groupDHB == "High vs. Low"){
-    #   DHBSelected$DHB <- c(minDHB, maxDHB)
-    #   # updatePickerInput(session = getDefaultReactiveDomain(),
-    #   #                   inputId = "DHB",
-    #   #                   selected = DHBSelected$DHB)
-    #   }
-    # else if(input$groupDHB == "Custom"){
-    #   DHBSelected$DHB <- input$DHB
-    # 
-    # } else i
-    
   })
 
   observe({
@@ -50,7 +50,7 @@ function(input, output) {
     # toggleState(id = "DHB",
     #             condition = input$groupDHB == "Custom")
     
-    if(input$groupDHB == 'Custom') {
+    if(input$groupDHB == 'Select DHB\'s') {
       show("DHB")
     } else {
       hide("DHB")
@@ -58,16 +58,9 @@ function(input, output) {
     # 
   })
   
-  output$graphTitle <- renderText({
-    title <- switch(input$items,
-      "vacc" = "Fully Vaccinated",
-      "ratio" = "Rate Ratios",
-      "ratio2" = "Rate Ratios Comparison"
-    )
-    paste(title)
-  })
+  #Create Plots ----
   
-  #Create Plots
+  #ERP vs. HSU Plots ----
 
   output$fullyVaccPlot <- renderPlotly({
     ##### Total Vaccinated Plots
@@ -139,11 +132,6 @@ function(input, output) {
       "Non-Maori" = DHBData$ERP$`Non-Maori` %>% filter(DHB %in% DHBSelected$DHB)
     )
 
-    # if(input$groupDHB == "High vs. Low") {
-    #   
-    #   req()
-    # }
-
     data <- rbind(
       data.frame(dataHSU, population = "HSU"),
       data.frame(dataERP, population = "ERP")
@@ -161,7 +149,14 @@ function(input, output) {
     dataMain <- lapply(DHBSelected$DHB, function(x) {
       data%>%filter(DHB %in% x)
     })
-    widthInfo = c(8,5,3,rep(2,17))
+    
+    #Use this to set all the y-axis the same (across row subplots)
+    topRange <- data%>%arrange(desc(Rate_Gamma1Upr))
+    topRange <- topRange[[1,'Rate_Gamma1Upr']]
+    
+    #Dynamically set widths.
+    widthInfo = c(6,4,3,rep(2,17))
+    
     plotList <- lapply(dataMain, function (x) {
       fig <- x%>%
         group_by(population)%>%
@@ -194,7 +189,9 @@ function(input, output) {
                xaxis = list(title = list(text = " "),
                             tickangle = 45),
                yaxis = list(title = list(text = " "),
-                            range = c(0,1.1*max(data$Rate_Gamma1Upr)),
+                            range = c(0,1.1*topRange),
+                            # range=c(0, ceiling(max(
+                            # aggregate(displ~cyl+class, mpg, sum)$displ)/10)*10)),
                             zerolinecolor = 'black',
                             zerolinewidth = 2,
                             gridcolor = 'black',
@@ -206,15 +203,15 @@ function(input, output) {
     })
     
     subplot(plotList, nrows = ceiling(length(DHBSelected$DHB)/4),
-            shareX = T, shareY = T, margin = c(0.005,0.005, 0.05, 0.05))  %>%
+            shareX = T, shareY = T, margin = c(0.005,0.005, 0.035, 0.035))%>%
       layout(annotations = list(list(
-        x = -0.08 , y = 0.3, text = "Rate per 100,000",
+        x = -0.058 , y = 0.3, text = "Rate per 100,000",
         font = list(color = "black",size = 15),
         textangle = 270,xanchor = "center",  
         yanchor = "bottom", 
         showarrow = F, xref='paper', yref='paper', size=48),
         list(
-          x = 0.5 , y = -0.35, text = "Age Groups",
+          x = 0.5 , y = -0.18, text = "Age Groups",
           font = list(color = "black",size = 15),xanchor = "center",  
           yanchor = "bottom", 
           showarrow = F, xref='paper', yref='paper', size=48)),
@@ -222,15 +219,15 @@ function(input, output) {
                       b = 50, t = 50,
                       pad = 20))
   })
+  
+  #Rate Ratio Plots ----
 
   output$rateRatioPlot <- renderPlotly({
-    ##### Ratio Plots
-    dataRatio <- switch(input$ethRatio,
-      "Total" = subset(TFVacc_DHBpopulation.df, DHB == "Total"),
-      "Maori" = subset(MFVacc_DHBpopulation.df, DHB == "Total"),
-      "Non-Maori" = subset(NMFVacc_DHBpopulation.df, DHB == "Total")
-    )
 
+    data <- AllFVacc_DHBpopulation.df%>%
+      filter(population %in% input$ethRatio,
+             DHB == "Total")
+    
     titlePlot <- switch(input$ethRatio,
       "Total" = "Total Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
       "Maori" = "Maori Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
@@ -243,7 +240,7 @@ function(input, output) {
       "Maori" = "#fb746c"
     )
     
-    figRatio <- dataRatio%>%
+    figRatio <- data%>%
       plot_ly(x = ~factor(AgeGroup, level = level_order))%>%
       add_trace(type = "bar",
                 y = ~RelativeRisk,
@@ -253,11 +250,11 @@ function(input, output) {
                                 color = 'black',
                                 thickness = 1,
                                 width = 14),
-                text = paste0("Age Group: ", dataRatio$AgeGroup,
-                              "<br>Relative Risk: ", round(dataRatio$RelativeRisk, 2),
+                text = paste0("Age Group: ", data$AgeGroup,
+                              "<br>Relative Risk: ", round(data$RelativeRisk, 2),
                               "<br>Gamma Interval: +",
-                              round(dataRatio$RelativeRiskUpr - dataRatio$RelativeRisk, 4), "/ -",
-                              round(dataRatio$RelativeRisk - dataRatio$RelativeRiskLwr, 4)),
+                              round(data$RelativeRiskUpr - data$RelativeRisk, 4), "/ -",
+                              round(data$RelativeRisk - data$RelativeRiskLwr, 4)),
                 hoverinfo = 'text',
                 showlegend = F,
                 color = ratioColour)
@@ -278,30 +275,32 @@ function(input, output) {
              paper_bgcolor = 'transparent'
       )
     
-    figRatio
+    suppressWarnings(figRatio)
   })
 
   output$ratioComparsion <- renderPlotly({
-    dataFilter <- AllFVacc_DHBpopulation.df %>%
-      filter(population == input$eth2,
-             DHB == "Total")
     
-    figPlot <- dataFilter%>%
+    data <- AllFVacc_DHBpopulation.df %>%
+      filter(population %in% input$ethRatio2,
+             DHB == "Total")
+    widthInfo2 <- c(14,6,4)
+    
+    figPlot <- data%>%
       plot_ly(x = ~factor(AgeGroup, level = level_order),
               color = ~population)%>%
       add_trace(type = 'bar',
                 y = ~RelativeRisk,
-                color = ~population,
-                text = paste0("Age Group: ", dataFilter$AgeGroup,
-                              "<br>Relative Risk: ", round(dataFilter$RelativeRisk, 2),
-                              "<br>Ethnicity: ", dataFilter$population),
-                              # "<br>Gamma Interval: +",
-                              # round(dataFilter$RelativeRiskUpr - dataFilter$RelativeRisk, 2), "/ -",
-                              # round(dataFilter$RelativeRisk - dataFilter$RelativeRiskLwr, 2)),
+                # color = ~population,
+                text = paste0("Age Group: ", data$AgeGroup,
+                              "<br>Relative Risk: ", round(data$RelativeRisk, 2),
+                              "<br>Ethnicity: ", data$population,
+                              "<br>Gamma Interval: +",
+                              round(data$RelativeRiskUpr - data$RelativeRisk, 4), "/ -",
+                              round(data$RelativeRisk - data$RelativeRiskLwr, 4)),
                 hoverinfo = 'text')%>%
                 # error_y = ~list(type = "x",
-                #                 array = RelativeRiskUpr - RelativeRisk,
-                #                 arrayminus = RelativeRisk - RelativeRiskLwr,
+                #                 array = data$RelativeRiskUpr - data$RelativeRisk,
+                #                 arrayminus = data$RelativeRisk - data$RelativeRiskLwr,
                 #                 color = 'black',
                 #                 thickness = 1,
                 #                 width = 4))%>%
@@ -321,27 +320,96 @@ function(input, output) {
              legend = list(bgcolor = 'transparent',
                            title = list(text = "Population")
       ))
-
-    # ggplotly(ggplot(subset(datafilter), aes(x = factor(AgeGroup, level = level_order), y = RelativeRisk, fill = population, group = population)) +
-      # geom_col(position = "dodge") +
-      # plot_annotation(title = "Fully Vaccinated Rate Ratio by Age Group & Ethnicity (HSU as baseline)") +
-      # labs(
-      #   y = "Rate Ratio",
-      #   x = "Age Groups"
-      # ) +
-      # scale_fill_manual(
-      #   values = c("Non-Maori" = "#06b73c", "Total" = "#639bfb", "Maori" = "#fb746c"),
-      #   name = "Population"
-      # ) &
-      # 
-      # theme(
-      #   plot.title = element_text(hjust = 0.5),
-      #   plot.background = element_rect(fill = "#ECF0F5", colour = "#ECF0F5"),
-      #   axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-      #   panel.grid.minor = element_line(size = 0.25, linetype = "solid", colour = "white"),
-      #   panel.grid.major = element_line(size = 0.5, linetype = "solid", colour = "white"),
-      #   panel.background = element_rect(fill = "#ECF0F5", colour = "#ECF0F5", size = 2, linetype = "solid"),
-      #   legend.background = element_rect(fill = "#ECF0F5")
-      # ))
+    
+    suppressWarnings(figPlot)
   })
+  
+  
+  #Count Plots ----
+  
+  output$ratioCountPlot <- renderPlotly({
+    
+    data <- AllFVacc_DHBpopulation.df%>%
+      filter(population %in% input$ethCount,
+             DHB == "Total")
+    
+    
+    titlePlot <- switch(input$ethCount,
+                        "Total" = "Total Fully Vaccinated Count by Age Group (HSU as baseline)",
+                        "Maori" = "Maori Fully Vaccinated Count by Age Group (HSU as baseline)",
+                        "Non-Maori" = "Non-Maori Fully Vaccinated Count by Age Group (HSU as baseline)"
+    )
+    
+    ratioColour <- switch(input$ethCount,
+                          "Non-Maori" = "#06b73c",
+                          "Total" = "#639bfb",
+                          "Maori" = "#fb746c"
+    )
+    
+    figRatio <- data%>%
+      plot_ly(x = ~factor(AgeGroup, level = level_order))%>%
+      add_trace(type = "bar",
+                y = ~Count,
+                text = paste0("Age Group: ", data$AgeGroup,
+                              "<br>Count: ", data$Count),
+                hoverinfo = 'text',
+                showlegend = F,
+                color = ratioColour)
+    
+    figRatio <- figRatio%>%
+      layout(xaxis = list(title = list(text = "Age Groups",
+                                       size = 2),
+                          tickangle = 45),
+             yaxis = list(title = list(text = "Count",
+                                       size = 2),
+                          zerolinecolor = 'black',
+                          zerolinewidth = 2,
+                          gridcolor = 'black',
+                          hoverformat = '.0f'),
+             title = list(text = titlePlot,
+                          font=list(size = 15)),
+             plot_bgcolor = 'transparent',
+             paper_bgcolor = 'transparent'
+      )
+    
+    figRatio
+    
+    
+  })
+  
+  output$countCompare <- renderPlotly({
+    data <- AllFVacc_DHBpopulation.df %>%
+      filter(population %in% input$ethCount2,
+             DHB == "Total")
+    widthInfo2 <- c(14,6,4)
+    
+    figPlot <- data%>%
+      plot_ly(x = ~factor(AgeGroup, level = level_order),
+              color = ~population)%>%
+      add_trace(type = 'bar',
+                y = ~Count,
+                text = paste0("Age Group: ", data$AgeGroup,
+                              "<br>Count: ", round(data$Count),
+                              "<br>Ethnicity: ", data$population),
+                hoverinfo = 'text')%>%
+      layout(xaxis = list(title = list(text = "Age Groups",
+                                       size = 2),
+                          tickangle = 45),
+             yaxis = list(title = list(text = "Count",
+                                       size = 2),
+                          zerolinecolor = 'black',
+                          zerolinewidth = 2,
+                          gridcolor = 'black',
+                          hoverformat = '.0f'),
+             title = list(text = "Fully Vaccinated Count by Age Group & Ethnicity (HSU as baseline)",
+                          font=list(size = 15)),
+             plot_bgcolor = 'transparent',
+             paper_bgcolor = 'transparent',
+             legend = list(bgcolor = 'transparent',
+                           title = list(text = "Population")
+             ))
+    
+    
+  })
+  
 }
