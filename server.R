@@ -1,30 +1,86 @@
 # Server
 function(input, output) {
   
-  #Title -----
-  output$graphTitle <- renderText({
+  #Titles -----
+  output$graphTitle <- renderUI({
     title <- switch(input$items,
                     "vacc" = "Fully Vaccinated",
                     "ratio" = "Rate Ratios",
                     "ratio2" = "Rate Ratios Comparison"
     )
-    paste(title)
+    HTML("<b>",title,"</b>")
   })
   
+  #Chart Section Title
+  output$chartTitle1 <- output$chartTitle2 <- output$chartTitle3 <- output$chartTitle4 <- output$chartTitle5 <- renderUI({
+    
+    HTML("<font size='+1'><b> Charts </b></font>")
+  })
+  
+  #"Brief Info " Title
+  output$textTitle <- renderUI({
+    HTML("<font size='+1'><b> Brief Information </b></font>")
+  })
+  
+  #Raw Data Section Title
+  output$rawDataTitle1 <- output$rawDataTitle2 <- renderUI({
+    
+    HTML("<font size='+1'><b> Raw Data </b></font>")
+  })
+  
+  
+  
+  #Reactive Text -----
+  output$textMain <- renderUI({
+    menuName <- switch(input$items,
+                       "vacc" = HTML("<b> HSU vs. ERP Data</b> compares NZ Vaccination Rates based on a unique population denominator, ERP and HSU."),
+                       "ratio" = HTML("<b>Rate Ratios</b> acts as a means to compare vaccination rates between Maori and the General population."))
+menuName
+  })
+  output$textERP <- renderUI({
+    HTML("<b> ERP </b>",
+         "<br><ul><li> \'Estimated Resident Population\'</li>",
+         "<li>Measured by Stats NZ</li>",
+         "<li>Updated regularly</li>",
+         "<li>Data is captured using Census</li>",
+         "<li></li>",
+         "</ul>")
+  })
+  output$textHSU <- renderUI({
+    HTML("<b> HSU </b>",
+         "<br><ul><li> \'Health Service User (Population)\'</li>",
+         "<li>Measured by the Ministry of Helath</li>",
+         "<li>Measure of the population that interacts with the healthcare system</li>",
+         "<li>GP appointments, ED visits etc.</li>",
+         "<li>Gives location specific data</li>",
+         "<li>Misses a large proportion of the \'at-risk\' population</li>",
+         "</ul>")
+  })
+  
+  output$textRateRatios <- renderUI({
+    
+    ethnicity <- c("Total", "Maori")
+
+    HTML("<ul> <li> <b>Rate Ratio</b> measures the selected ethnicity divided by unselected ethnicity </li>",
+         "<li> For example you have selected <em>", input$ethRatio, "</em>divided by <em>", 
+         ethnicity[which(ethnicity != input$ethRatio)]," </em> </li> </ul>" )
+    
+  })
   #Creating reactive values -----
   DHBSelected <- reactiveValues()
   
   observe({
-    maxDHB <- rbind(DHBData$HSU[[input$ethDHB]], 
-                    DHBData$ERP[[input$ethDHB]])%>%
-      arrange(desc(Rate_Gamma1Upr))
     
+    maxDHB <- Data_All[[input$genderVaccDHB]]$DHB%>%
+      filter(ethnicity == input$ethDHB)%>%
+      arrange(desc(Rate_Gamma1Upr))
+
     maxDHB <- maxDHB[[1,1]]
     
-    minDHB <- rbind(DHBData$HSU[[input$ethDHB]], 
-                    DHBData$ERP[[input$ethDHB]])%>%
-      arrange((Rate_Gamma1Lwr))%>%
-      filter(DHB != "Overseas / Unknown")
+    minDHB <- Data_All[[input$genderVaccDHB]]$DHB%>%
+      filter(DHB != "Overseas / Unknown", 
+             ethnicity == input$ethDHB)%>%
+      arrange((Rate_Gamma1Lwr))
     
     minDHB <- minDHB[[1,1]]
     
@@ -47,9 +103,6 @@ function(input, output) {
 
   observe({
     
-    # toggleState(id = "DHB",
-    #             condition = input$groupDHB == "Custom")
-    
     if(input$groupDHB == 'Select DHB\'s') {
       show("DHB")
     } else {
@@ -66,10 +119,9 @@ function(input, output) {
     ##### Total Vaccinated Plots
 
     # Change Data based on selection of Total/Maori
-    data <- switch(input$ethFull,
-      "Total" = subset(HSUvsERP_TFVacc_DHB.df),
-      "Maori" = subset(HSUvsERP_MFVacc_DHB.df)
-    )
+    
+    data <- Data_All[[input$genderVacc]]$Nationwide%>%
+      filter(ethnicity == input$ethFull)
 
     # Change Title based on Selection
     titlePlot <- switch(input$ethFull,
@@ -118,24 +170,10 @@ function(input, output) {
   })
 
   output$plotDHB <- renderPlotly({
-    ##### Total Vaccinated Plots
-
-    # Change Data based on selection of Total/Maori
-    dataHSU <- switch(input$ethDHB,
-      "Total" = DHBData$HSU$Total %>% filter(DHB %in% DHBSelected$DHB),
-      "Maori" = DHBData$HSU$Maori %>% filter(DHB %in% DHBSelected$DHB),
-      "Non-Maori" = DHBData$HSU$`Non-Maori` %>% filter(DHB %in% DHBSelected$DHB)
-    )
-    dataERP <- switch(input$ethDHB,
-      "Total" = DHBData$ERP$Total %>% filter(DHB %in% DHBSelected$DHB),
-      "Maori" = DHBData$ERP$Maori %>% filter(DHB %in% DHBSelected$DHB),
-      "Non-Maori" = DHBData$ERP$`Non-Maori` %>% filter(DHB %in% DHBSelected$DHB)
-    )
-
-    data <- rbind(
-      data.frame(dataHSU, population = "HSU"),
-      data.frame(dataERP, population = "ERP")
-    )
+    
+    data <- Data_All[[input$genderVaccDHB]]$DHB%>%
+      filter(ethnicity == input$ethDHB,
+             DHB %in% DHBSelected$DHB)
 
     # Change Title based on Selection
     titlePlot <- switch(input$ethDHB,
@@ -144,8 +182,6 @@ function(input, output) {
       "Non-Maori" = "Non-Maori Fully Vaccinated by Age Group & DHB"
     )
 
-    
-      
     dataMain <- lapply(DHBSelected$DHB, function(x) {
       data%>%filter(DHB %in% x)
     })
@@ -223,11 +259,11 @@ function(input, output) {
   #Rate Ratio Plots ----
 
   output$rateRatioPlot <- renderPlotly({
-
-    data <- AllFVacc_DHBpopulation.df%>%
+    
+    data <- Data_All[[input$genderRatio]]$RatioInfo%>%
       filter(population %in% input$ethRatio,
              DHB == "Total")
-    
+
     titlePlot <- switch(input$ethRatio,
       "Total" = "Total Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
       "Maori" = "Maori Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
@@ -280,7 +316,7 @@ function(input, output) {
 
   output$ratioComparsion <- renderPlotly({
     
-    data <- AllFVacc_DHBpopulation.df %>%
+    data <- Data_All[[input$genderRatio]]$RatioInfo%>%
       filter(population %in% input$ethRatio2,
              DHB == "Total")
     widthInfo2 <- c(14,6,4)
@@ -329,7 +365,7 @@ function(input, output) {
   
   output$ratioCountPlot <- renderPlotly({
     
-    data <- AllFVacc_DHBpopulation.df%>%
+    data <- Data_All[[input$genderCount]]$RatioInfo%>%
       filter(population %in% input$ethCount,
              DHB == "Total")
     
@@ -378,7 +414,7 @@ function(input, output) {
   })
   
   output$countCompare <- renderPlotly({
-    data <- AllFVacc_DHBpopulation.df %>%
+    data <- Data_All[[input$genderCount]]$RatioInfo %>%
       filter(population %in% input$ethCount2,
              DHB == "Total")
     widthInfo2 <- c(14,6,4)
@@ -409,6 +445,89 @@ function(input, output) {
                            title = list(text = "Population")
              ))
     
+    
+  })
+  
+  
+  
+  
+  #Data Tables ----
+  
+  output$tableFull <- renderDataTable({
+    
+
+      data <- switch(input$vaccType,
+                     "Nationwide" = Data_All[[input$genderVacc]]$Nationwide%>%
+                       filter(ethnicity == input$ethFull),
+                     "By DHB" = Data_All[[input$genderVaccDHB]]$DHB%>%
+                       filter(ethnicity == input$ethDHB)
+                     )
+      
+      
+      
+      datatable(data%>%
+                  select("DHB", "population", "ethnicity",
+                         "AgeGroup", "Count", "Total",
+                         "Rate", "Rate_Gamma1Lwr", "Rate_Gamma1Upr", 
+                         "RateMult", "Variance", 
+                         "Weights"),
+                colnames = c("DHB", "Pop.Measure", "Ethnicity",
+                             "Age Group", "Count", "Total",
+                             "Rate", "Gamma Lwr", "Gamma Upr", 
+                             "Rate Multiplier", "Variance", 
+                             "Weights"),
+                options = list(scrollX = TRUE)
+                )%>%
+        formatRound(columns = c("Rate", "RateMult", "Variance",
+                                "Rate_Gamma1Lwr", "Rate_Gamma1Upr",
+                                "Weights"), 
+                    digits = c(4, 0, 7, 
+                               0, 0, 0),
+                    mark = "")
+
+  })
+  
+  
+  output$tableRate <- renderDataTable({
+    gender <- switch(input$ratioTabs,
+                     "Rate Ratio" = input$genderRatio,
+                     "Rate Difference" = input$genderDifference,
+                     "Count" = input$genderCount)
+    
+    data <- Data_All[[gender]]$RatioInfo
+    
+    datatable(data%>%
+                select("DHB", "AgeGroup", "population",
+                       "Count",
+                       # "Total", "Weights", 
+                       # "Rate","RateMult", "Variance", 
+                       # "Rate_KeyfitzLwr", "Rate_KeyfitzUpr", 
+                       # "Rate_Gamma1Lwr", "Rate_Gamma1Upr", 
+                       # "RateBaseline", "VarianceBaseline", 
+                       # "RateBaselineLwr", "RateBaselineUpr",
+                       "RelativeRisk", 
+                       "RelativeRiskLwr", "RelativeRiskUpr"
+                       # "AttributableRisk",
+                       # "AttributableRiskLwr", "AttributableRiskUpr"
+                       ),
+              colnames = c("DHB", "Age Group", 
+                           "Ethnicity", "Count", "Relative Risk",
+                           "Relative Risk Lwr", "Relative Risk Upr"),
+              options = list(scrollX = TRUE))%>%
+      formatRound(columns = c(
+                              # "Weights", "Rate", 
+                              # "RateMult", "Variance",
+                              # "Rate_KeyfitzLwr", "Rate_KeyfitzUpr",
+                              # "Rate_Gamma1Lwr", "Rate_Gamma1Upr",
+                              # "RateBaseline", "VarianceBaseline",
+                              # "RateBaselineLwr", "RateBaselineUpr",
+                              "RelativeRisk", 
+                              "RelativeRiskLwr", "RelativeRiskUpr"
+                              # "AttributableRisk",
+                              # "AttributableRiskLwr", "AttributableRiskUpr"
+                              ),
+                  digits = c(2,2,2),
+                  mark = "")
     
   })
   

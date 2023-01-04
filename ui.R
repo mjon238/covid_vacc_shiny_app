@@ -25,14 +25,22 @@
       #Need this to activate hide/show input functions
       useShinyjs(),
       
-      # conditionalPanel(
-      #   condition = "input.items == 'vacc'",
-      #   
-      # ),
-      # 
         #Nationwide Tab ----
       conditionalPanel(
         condition = "input.items == 'vacc' && input.vaccType == 'Nationwide'",
+        
+        #Date
+        selectInput(
+          inputId = "dateFull",
+          label = "Select Date",
+          choices = c("2021-11-01"),
+          selected = "2021-11-01",
+          selectize = F
+        ),
+        hr(),
+        div(style = "margin-bottom: -20px;"),
+        
+        #Gender
         selectInput(
           inputId = "genderVacc",
           label = "Select Sex",
@@ -43,17 +51,30 @@
         hr(),
         div(style = "margin-bottom: -20px;"),
         
+        #Ethincity
         selectInput(
           inputId = "ethFull",
           label = "Select Ethnicity",
           choices = c("Total", "Maori"),
           selected = "Total",
           selectize = F
-        )),
+        )
+        ),
 
         #DHB Only Tab ----
       conditionalPanel(
         condition = "input.items == 'vacc' && input.vaccType == 'By DHB'",
+        
+        #Date
+        selectInput(
+          inputId = "dateDHB",
+          label = "Select Date",
+          choices = c("2021-11-01"),
+          selected = "2021-11-01",
+          selectize = F
+        ),
+        hr(),
+        div(style = "margin-bottom: -20px;"),
         
         #Gender
         selectInput(
@@ -70,7 +91,9 @@
         selectInput(
           inputId = "ethDHB",
           label = "Select Ethnicity",
-          choices = c("Total", "Maori", "Non-Maori"),
+          choices = c("Total", "Maori"
+                      # ,"Non-Maori"
+                      ),
           selected = "Total",
           selectize = F
         ),
@@ -104,7 +127,19 @@
       #Gender Inputs
       conditionalPanel(
         condition = "input.items == 'ratio' 
-        && input.ratioTabs == 'Ratio Rates'",
+        && input.ratioTabs == 'Rate Ratio'",
+        
+        #Date
+        selectInput(
+          inputId = "dateRatio",
+          label = "Select Date",
+          choices = c("2021-11-01"),
+          selected = "2021-11-01",
+          selectize = F
+        ),
+        hr(),
+        div(style = "margin-bottom: -20px;"),
+        
         selectInput(
           inputId = "genderRatio",
           label = "Select Sex",
@@ -118,14 +153,16 @@
         #Ratio Rates Single Inputs -----
       conditionalPanel(
         condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Ratio Rates'
+        && input.ratioTabs == 'Rate Ratio'
         && input.ratioCompare1 == 'Single'",
         
         #Ethinicty
         selectInput(
           inputId = "ethRatio",
           label = "Select Ethnicity",
-          choices = c("Total", "Maori", "Non-Maori"),
+          choices = c("Total", "Maori"
+                      # , "Non-Maori"
+                      ),
           selected = "Total",
           selectize = F
         )),
@@ -134,15 +171,19 @@
         #Ratio Rates Compare Inputs -----
       conditionalPanel(
         condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Ratio Rates'
+        && input.ratioTabs == 'Rate Ratio'
         && input.ratioCompare1 == 'Compare'",
         
         #Ethnicity
       pickerInput(
         inputId = "ethRatio2",
         label = "Select Ethnicity's To Compare",
-        choices = c("Total", "Maori", "Non-Maori"),
-        selected = c("Total", "Maori", "Non-Maori"),
+        choices = c("Total", "Maori"
+                    # , "Non-Maori"
+                    ),
+        selected = c("Total", "Maori"
+                     # , "Non-Maori"
+                     ),
         multiple = T
       )
       ),
@@ -150,10 +191,24 @@
       
       #Count Inputs ----
       
+      
+      
       #Gender
       conditionalPanel(
         condition = "input.items == 'ratio' 
         && input.ratioTabs == 'Count'",
+        
+        #Date
+        selectInput(
+          inputId = "dateCount",
+          label = "Select Date",
+          choices = c("2021-11-01"),
+          selected = "2021-11-01",
+          selectize = F
+        ),
+        hr(),
+        div(style = "margin-bottom: -20px;"),
+        
         selectInput(
           inputId = "genderCount",
           label = "Select Sex",
@@ -175,7 +230,9 @@
         selectInput(
           inputId = "ethCount",
           label = "Select Ethnicity",
-          choices = c("Total", "Maori", "Non-Maori"),
+          choices = c("Total", "Maori"
+                      # , "Non-Maori"
+                      ),
           selected = "Total",
           selectize = F
         )),
@@ -190,8 +247,12 @@
         pickerInput(
           inputId = "ethCount2",
           label = "Select Ethnicity's To Compare",
-          choices = c("Total", "Maori", "Non-Maori"),
-          selected = c("Total", "Maori", "Non-Maori"),
+          choices = c("Total", "Maori"
+                      # , "Non-Maori"
+                      ),
+          selected = c("Total", "Maori"
+                       # , "Non-Maori"
+                       ),
           multiple = T
         )),
 
@@ -201,7 +262,20 @@
     #Gender
     conditionalPanel(
       condition = "input.items == 'ratio' 
-        && input.ratioTabs == 'Ratio Difference'",
+        && input.ratioTabs == 'Rate Difference'",
+      
+      #Date
+      selectInput(
+        inputId = "dateDifference",
+        label = "Select Date",
+        choices = c("2021-11-01"),
+        selected = "2021-11-01",
+        selectize = F
+      ),
+      hr(),
+      div(style = "margin-bottom: -20px;"),
+      
+      #Gender
       selectInput(
         inputId = "genderDifference",
         label = "Select Sex",
@@ -216,14 +290,16 @@
        #Difference Single Inputs ----
     conditionalPanel(
       condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Ratio Difference'
+        && input.ratioTabs == 'Rate Difference'
         && input.ratioCompare3 == 'Single'",
       
       #Ethnicity
       selectInput(
         inputId = "ethDifference",
         label = "Select Ethnicity",
-        choices = c("Total", "Maori", "Non-Maori"),
+        choices = c("Total", "Maori"
+                    # , "Non-Maori"
+                    ),
         selected = "Total",
         selectize = F
       )),
@@ -231,15 +307,19 @@
        #Difference Compare Inputs ----
     conditionalPanel(
       condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Ratio Difference'
+        && input.ratioTabs == 'Rate Difference'
         && input.ratioCompare3 == 'Compare'",
       
       #Ethnicity
       pickerInput(
         inputId = "ethDifference2",
         label = "Select Ethnicity's To Compare",
-        choices = c("Total", "Maori", "Non-Maori"),
-        selected = c("Total", "Maori", "Non-Maori"),
+        choices = c("Total", "Maori"
+                    # , "Non-Maori"
+                    ),
+        selected = c("Total", "Maori"
+                     # , "Non-Maori"
+                     ),
         multiple = T
       ))
   ),
@@ -285,7 +365,7 @@
       
       
       #Title ----
-      textOutput(outputId = "graphTitle"),
+      uiOutput(outputId = "graphTitle"),
       
       #HSU vs. ERP Output -----
       conditionalPanel(
@@ -296,6 +376,7 @@
           #Nationwide Tab ----
           tabPanel(
             "Nationwide",
+            uiOutput("chartTitle1"),
             br(),
             plotlyOutput("fullyVaccPlot", width = "800px", height = "400px")
             
@@ -304,6 +385,7 @@
           #DHB Tab ----
           tabPanel(
             "By DHB",
+            uiOutput("chartTitle2"),
             br(),
             # box(width = 12, height = 12, style = "overflow-y: auto; overflow-x: auto;",
             plotlyOutput("plotDHB", width = "1200px", height = "600px")
@@ -322,7 +404,9 @@
           
           #Ratio Rates Tab ----
           tabPanel(
-            "Ratio Rates",
+            "Rate Ratio",
+            uiOutput("chartTitle3"),
+            
             br(),
             
             #Single ----
@@ -339,9 +423,22 @@
                             selected = "Single")
           ),
           
+          #Rate Difference Tab ----
+          tabPanel("Rate Difference",
+                   uiOutput("chartTitle4"),
+                   br(),
+                   
+          radioGroupButtons(inputId = "ratioCompare3",
+                            label = "Plot View",
+                            choices = c("Single", "Compare"),
+                            selected = "Single")
+          ),
+          
           #Count Outputs ----
           tabPanel(
             "Count",
+            uiOutput("chartTitle5"),
+            
             br(),
             
             #Single ----
@@ -355,16 +452,40 @@
                               label = "Plot View",
                               choices = c("Single", "Compare"),
                               selected = "Single")
-          ),
-          
-          #Ratio Difference Tab ----
-          tabPanel("Ratio Difference",
-          radioGroupButtons(inputId = "ratioCompare3",
-                            label = "Plot View",
-                            choices = c("Single", "Compare"),
-                            selected = "Single"))
+            
+          )
         )
+      ),
+      hr(),
+      
+      #Text Information ----
+      fluidRow(column(12, 
+      uiOutput("textTitle"),
+       uiOutput("textMain"),
+      conditionalPanel(condition = "input.items == 'vacc'",
+       uiOutput("textERP"),
+       br(),
+        uiOutput("textHSU"),
+       br(),
+       
+       
+       
+       #Raw Data Tables ----
+       
+       uiOutput("rawDataTitle1"),
+       DTOutput("tableFull")
+      ),
+      conditionalPanel(condition = "input.items == 'ratio'",
+                       uiOutput("textRateRatios"),
+                       br(),
+                       uiOutput("rawDataTitle2"),
+                       DTOutput("tableRate")
+                       
       )
+      
+      ))
+
+      
     )
   )
 # )
