@@ -193,16 +193,17 @@ ERP_MFVacc_SFnontot.df <- ERP_MFVacc_SFnontot.df %>%
 #Non-Maori Fully Vaccinated Rates -----
 
 # Total fully vaccinated
-NMFVacc_SFnontotal.df <- subset(NMFVacc_SFnontotal.df, Group != "Total" & Group != "Male" & DHB != "Total")
+# NMFVacc_SFnontotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "NonMaoriFullVacc")
+NMFVacc_SFnontotal.df<- subset(NMFVacc_SFnontotal.df, Group!="Total" & Group!="Male" & DHB!="Total")
 
-NMFVacc_SFnontotal.df <- pivot_longer(NMFVacc_SFnontotal.df, cols = 4:20, names_to = "AgeGroup", values_to = "Count") # changing from rows to column
-NMFVacc_SFnontotal.df <- NMFVacc_SFnontotal.df[, c(1, 4, 5, 3)] # rearranging columns to match Daniel's example below
+NMFVacc_SFnontotal.df <- pivot_longer(NMFVacc_SFnontotal.df, cols = 4:20, names_to = "AgeGroup", values_to = "Count" ) #changing from rows to column
+NMFVacc_SFnontotal.df <- NMFVacc_SFnontotal.df[,c(1,4,5,3)] #rearranging columns to match Daniel's example below
 
 
 # Using HSU Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-HSU_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, HSUMn.df, by = "AgeGroup")
+HSU_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, HSUNMn.df, by = "AgeGroup")
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -210,27 +211,28 @@ HSU_NMFVacc_SFtot.df <- HSU_NMFVacc_SFnontot.df %>%
   group_by(DHB) %>%
   summarise(
     AgeGroup = "Total",
-    Count = sum(Count), Total = sum(Weights) # sum weights as want to divide by total HSU population for Rate
+    Count = sum(Count), Total = sum(Weights) #sum weights as want to divide by total HSU population for Rate
   )
 
 ## Calculate the age-specific rates for each age group in each year
-alpha <- 0.05 # added this in for 95% CI
+alpha = 0.05 #added this in for 95% CI
 HSU_NMFVacc_SFnontot.df <- HSU_NMFVacc_SFnontot.df %>%
   mutate(
-    Rate = Count / Weights, # dividing by age-band population for rate
+    Rate     = Count / Weights, #dividing by age-band population for rate
     RateMult = Rate * 100000,
     Variance = Rate / Weights, ## Var(R) = Count / Weights^2
     
-    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE)) * 100000,
-    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance)) * 100000,
-    Rate_Gamma1Lwr = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights) * 100000,
-    Rate_Gamma1Upr = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights) * 100000
+    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE))*100000,
+    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance))*100000,
+    
+    Rate_Gamma1Lwr  = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights)*100000,
+    Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
 
 # Using ERP Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-ERP_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, ERPMn.df, by = "AgeGroup")
+ERP_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, ERPNMn.df, by = "AgeGroup")
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -238,21 +240,22 @@ ERP_NMFVacc_SFtot.df <- ERP_NMFVacc_SFnontot.df %>%
   group_by(DHB) %>%
   summarise(
     AgeGroup = "Total",
-    Count = sum(Count), Total = sum(Weights) # sum weights as want to divide by total HSU population for Rate
+    Count = sum(Count), Total = sum(Weights) #sum weights as want to divide by total HSU population for Rate
   )
 
 ## Calculate the age-specific rates for each age group in each year
-alpha <- 0.05 # added this in for 95% CI
+alpha = 0.05 #added this in for 95% CI
 ERP_NMFVacc_SFnontot.df <- ERP_NMFVacc_SFnontot.df %>%
   mutate(
-    Rate = Count / Weights, # dividing by age-band population for rate
+    Rate     = Count / Weights, #dividing by age-band population for rate
     RateMult = Rate * 100000,
     Variance = Rate / Weights, ## Var(R) = Count / Weights^2
     
-    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE)) * 100000,
-    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance)) * 100000,
-    Rate_Gamma1Lwr = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights) * 100000,
-    Rate_Gamma1Upr = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights) * 100000
+    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE))*100000,
+    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance))*100000,
+    
+    Rate_Gamma1Lwr  = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights)*100000,
+    Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
 
 
@@ -368,56 +371,58 @@ ERP_MFVacc_DHB_SFtot.df <- ERP_MFVacc_DHB_SFtot.df %>%
 ## Rates of DHB Total by Age groups (Non-Maori pop) -----
 
 # Total fully vaccinated
-NMFVacc_DHB_SFtotal.df <- subset(NMFVacc_DHB_SFtotal.df, Group != "Total" & Group != "Male" & DHB == "Total")
+# NMFVacc_DHB_SFtotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "NonMaoriFullVacc")
+NMFVacc_DHB_SFtotal.df<- subset(NMFVacc_DHB_SFtotal.df, Group!="Total" & Group!="Male" & DHB=="Total")
 
-NMFVacc_DHB_SFtotal.df <- pivot_longer(NMFVacc_DHB_SFtotal.df, cols = 3, values_to = "Total") # changing from rows to column
-NMFVacc_DHB_SFtotal.df <- pivot_longer(NMFVacc_DHB_SFtotal.df, cols = 3:19, names_to = "AgeGroup", values_to = "Count") # changing from rows to column
+NMFVacc_DHB_SFtotal.df <- pivot_longer(NMFVacc_DHB_SFtotal.df, cols = 3, values_to = "Total" ) #changing from rows to column
+NMFVacc_DHB_SFtotal.df <- pivot_longer(NMFVacc_DHB_SFtotal.df, cols = 3:19, names_to = "AgeGroup", values_to = "Count" ) #changing from rows to column
 
-NMFVacc_DHB_SFtotal.df <- NMFVacc_DHB_SFtotal.df[, c(1, 5, 6, 4)] # rearranging columns to match Daniel's example below
+NMFVacc_DHB_SFtotal.df <- NMFVacc_DHB_SFtotal.df[,c(1,5,6,4)] #rearranging columns to match Daniel's example below
 
 
 
 # Using HSU Weights
 
 
-HSU_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, HSUMn.df, by = "AgeGroup")
+HSU_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, HSUNMn.df, by = "AgeGroup")
 
 
 ## Calculate the age-specific rates for each age group for total regions
-alpha <- 0.05 # added this in for 95% CI
+alpha = 0.05 #added this in for 95% CI
 HSU_NMFVacc_DHB_SFtot.df <- HSU_NMFVacc_DHB_SFtot.df %>%
   mutate(
-    Rate = Count / Weights,
+    Rate     = Count / Weights,
     RateMult = Rate * 100000,
     Variance = Rate / Weights, ## Var(R) = Count / Total^2
     
-    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE)) * 100000,
-    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance)) * 100000,
-    Rate_Gamma1Lwr = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights) * 100000,
-    Rate_Gamma1Upr = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights) * 100000
+    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE))*100000,
+    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance))*100000,
+    
+    Rate_Gamma1Lwr  = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights)*100000,
+    Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
 
 
 # Using ERP Weights
 
 
-ERP_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, ERPMn.df, by = "AgeGroup")
+ERP_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, ERPNMn.df, by = "AgeGroup")
 
 
 ## Calculate the age-specific rates for each age group for total regions
-alpha <- 0.05 # added this in for 95% CI
+alpha = 0.05 #added this in for 95% CI
 ERP_NMFVacc_DHB_SFtot.df <- ERP_NMFVacc_DHB_SFtot.df %>%
   mutate(
-    Rate = Count / Weights,
+    Rate     = Count / Weights,
     RateMult = Rate * 100000,
     Variance = Rate / Weights, ## Var(R) = Count / Total^2
     
-    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE)) * 100000,
-    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance)) * 100000,
-    Rate_Gamma1Lwr = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights) * 100000,
-    Rate_Gamma1Upr = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights) * 100000
+    Rate_KeyfitzLwr = (pmax(0, Rate - qnorm(1 - alpha / 2) * sqrt(Variance), na.rm = TRUE))*100000,
+    Rate_KeyfitzUpr = (Rate + qnorm(1 - alpha / 2) * sqrt(Variance))*100000,
+    
+    Rate_Gamma1Lwr  = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights)*100000,
+    Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
-
 
 #PLOT DATA -----
 
@@ -592,9 +597,9 @@ ERP_NMFVacc_SFpopulation.total <- ERP_NMFVacc_DHB_SFtot.df
 ## Rename variables so we can use them after joining to the other dataset (otherwise we get Rate.x and Rate.y which is a bit confusing).
 HSU_NMFVacc_SFbaseline.total <- HSU_NMFVacc_SFbaseline.total %>%
   dplyr::rename(
-    RateBaseline = Rate,
+    RateBaseline     = Rate,
     VarianceBaseline = Variance,
-    # W_meanBaseline   = W_mean,
+    #W_meanBaseline   = W_mean,
     RateBaselineLwr = Rate_KeyfitzLwr,
     RateBaselineUpr = Rate_KeyfitzUpr
   ) %>%
@@ -616,13 +621,14 @@ HSU_NMFVacc_SFbaseline.other <- HSU_NMFVacc_SFbaseline.other %>%
     RRVarBaseline = (1 / Count - 1 / Total),
     CountBaseline = Count,
     TotalBaseline = Total,
+    
     RateBaselineLwr = Rate_KeyfitzLwr,
     RateBaselineUpr = Rate_KeyfitzUpr
   ) %>%
   dplyr::select(DHB, AgeGroup, RateBaseline, RRVarBaseline, CountBaseline, TotalBaseline, RateBaselineLwr, RateBaselineUpr)
 
 ## Join the baseline and other population datasets, calculating the RR and asssociated CI
-ERP_NMFVacc_SFpopulation.other <- ERP_NMFVacc_SFpopulation.other %>%
+ERP_NMFVacc_SFpopulation.other <-ERP_NMFVacc_SFpopulation.other %>%
   dplyr::left_join(HSU_NMFVacc_SFbaseline.other, by = c("DHB", "AgeGroup")) %>%
   dplyr::mutate(
     RelativeRisk = Rate / RateBaseline,
@@ -641,12 +647,13 @@ ERP_NMFVacc_SFpopulation.other <- ERP_NMFVacc_SFpopulation.other %>%
 NMFVacc_DHB_SFpopulation.df <- ERP_NMFVacc_SFpopulation.total %>%
   dplyr::left_join(HSU_NMFVacc_SFbaseline.total, by = c("DHB", "AgeGroup")) %>%
   dplyr::mutate(
-    RelativeRisk = Rate / RateBaseline,
-    RRVar = ((Total - Count) / Total) / Count,
+    RelativeRisk    = Rate / RateBaseline,
+    RRVar           = ((Total - Count) / Total) / Count,
     RelativeRiskLwr = exp(log(RelativeRisk) - 1.96 * sqrt(RRVar + RRVarBaseline)),
     RelativeRiskUpr = exp(log(RelativeRisk) + 1.96 * sqrt(RRVar + RRVarBaseline)),
-    AttributableRisk = Rate - RateBaseline,
-    ARVar = Variance,
+    
+    AttributableRisk    = Rate - RateBaseline,
+    ARVar               = Variance,
     AttributableRiskLwr = AttributableRisk - 1.96 * sqrt(ARVar + ARVarBaseline),
     AttributableRiskUpr = AttributableRisk + 1.96 * sqrt(ARVar + ARVarBaseline)
   ) %>%

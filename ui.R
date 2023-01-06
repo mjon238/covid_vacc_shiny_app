@@ -55,7 +55,7 @@
         selectInput(
           inputId = "ethFull",
           label = "Select Ethnicity",
-          choices = c("Total", "Maori"),
+          choices = c("Total", "Maori", "Non-Maori"),
           selected = "Total",
           selectize = F
         )
@@ -92,7 +92,7 @@
           inputId = "ethDHB",
           label = "Select Ethnicity",
           choices = c("Total", "Maori"
-                      # ,"Non-Maori"
+                      ,"Non-Maori"
                       ),
           selected = "Total",
           selectize = F
@@ -161,7 +161,7 @@
           inputId = "ethRatio",
           label = "Select Ethnicity",
           choices = c("Total", "Maori"
-                      # , "Non-Maori"
+                      , "Non-Maori"
                       ),
           selected = "Total",
           selectize = F
@@ -179,10 +179,10 @@
         inputId = "ethRatio2",
         label = "Select Ethnicity's To Compare",
         choices = c("Total", "Maori"
-                    # , "Non-Maori"
+                    , "Non-Maori"
                     ),
         selected = c("Total", "Maori"
-                     # , "Non-Maori"
+                     , "Non-Maori"
                      ),
         multiple = T
       )
@@ -231,7 +231,7 @@
           inputId = "ethCount",
           label = "Select Ethnicity",
           choices = c("Total", "Maori"
-                      # , "Non-Maori"
+                      , "Non-Maori"
                       ),
           selected = "Total",
           selectize = F
@@ -248,10 +248,10 @@
           inputId = "ethCount2",
           label = "Select Ethnicity's To Compare",
           choices = c("Total", "Maori"
-                      # , "Non-Maori"
+                      , "Non-Maori"
                       ),
           selected = c("Total", "Maori"
-                       # , "Non-Maori"
+                       , "Non-Maori"
                        ),
           multiple = T
         )),
@@ -298,7 +298,7 @@
         inputId = "ethDifference",
         label = "Select Ethnicity",
         choices = c("Total", "Maori"
-                    # , "Non-Maori"
+                    , "Non-Maori"
                     ),
         selected = "Total",
         selectize = F
@@ -315,10 +315,10 @@
         inputId = "ethDifference2",
         label = "Select Ethnicity's To Compare",
         choices = c("Total", "Maori"
-                    # , "Non-Maori"
+                    , "Non-Maori"
                     ),
         selected = c("Total", "Maori"
-                     # , "Non-Maori"
+                     , "Non-Maori"
                      ),
         multiple = T
       ))
@@ -427,6 +427,14 @@
           tabPanel("Rate Difference",
                    uiOutput("chartTitle4"),
                    br(),
+                   
+                   conditionalPanel(condition = "input.ratioCompare3 == 'Single'",
+                                    plotlyOutput("rateDiffPlot", width = "800px")),
+                   
+                   #Compare ----
+                   conditionalPanel(condition = "input.ratioCompare3 == 'Compare'",
+                                    plotlyOutput("diffCompare", width = "800px")
+                                    ),
                    
           radioGroupButtons(inputId = "ratioCompare3",
                             label = "Plot View",

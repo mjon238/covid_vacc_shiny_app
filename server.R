@@ -61,10 +61,11 @@ menuName
     
     ethnicity <- c("Total", "Maori")
 
-    HTML("<ul> <li> <b>Rate Ratio</b> measures the selected ethnicity divided by unselected ethnicity </li>",
-         "<li> For example you have selected <em>", input$ethRatio, "</em>divided by <em>", 
-         ethnicity[which(ethnicity != input$ethRatio)]," </em> </li> </ul>" )
-    
+    HTML("<ul> <li> <b>Rate Ratio</b> measures the ERP vaccination rate divided by the HSU vaccination rate. </li>",
+         "<li> A Rate Ratio greater than 1 inidicates that the ERP vaccination rate is higher than the HSU. </li>",
+         "<li> <b>Rate Difference</b> measures the ERP vaccination rate minus the HSU vaccination rate.</li>",
+         "<li> <b>Count</b> measures the actual count of inidividuals vaccinated.</li></ul>")
+
   })
   #Creating reactive values -----
   DHBSelected <- reactiveValues()
@@ -123,10 +124,16 @@ menuName
     data <- Data_All[[input$genderVacc]]$Nationwide%>%
       filter(ethnicity == input$ethFull)
 
+    genderTitle <- switch(input$genderVacc,
+                          "Male" = "Male ",
+                          "Female" = "Female ")
+    
     # Change Title based on Selection
     titlePlot <- switch(input$ethFull,
-      "Total" = "Total Fully Vaccinated Rates by Age Groups",
-      "Maori" = "Maori Fully Vaccinated Rates by Age Groups"
+      "Total" = paste0("Total ", genderTitle,"Fully Vaccinated Rates by Age Groups"),
+      "Maori" = paste0("Maori ", genderTitle, "Fully Vaccinated Rates by Age Groups"),
+      "Non-Maori" = paste0("Non-Maori ", genderTitle ,"Fully Vaccinated Rates by Age Groups")
+      
     )
     figTotal <- plot_ly(subset(data),
                        x = ~factor(AgeGroup, level = level_order),
@@ -175,12 +182,18 @@ menuName
       filter(ethnicity == input$ethDHB,
              DHB %in% DHBSelected$DHB)
 
+    genderTitle <- switch(input$genderVaccDHB,
+                          "Male" = "Male ",
+                          "Female" = "Female ")
+    
     # Change Title based on Selection
     titlePlot <- switch(input$ethDHB,
-      "Total" = "Total Fully Vaccinated by Age Group & DHB",
-      "Maori" = "Maori Fully Vaccinated by Age Group & DHB",
-      "Non-Maori" = "Non-Maori Fully Vaccinated by Age Group & DHB"
+                        "Total" = paste0("Total ", genderTitle,"Fully Vaccinated Rates by Age Groups"),
+                        "Maori" = paste0("Maori ", genderTitle, "Fully Vaccinated Rates by Age Groups"),
+                        "Non-Maori" = paste0("Non-Maori ", genderTitle ,"Fully Vaccinated Rates by Age Groups")
+                        
     )
+    
 
     dataMain <- lapply(DHBSelected$DHB, function(x) {
       data%>%filter(DHB %in% x)
@@ -263,13 +276,21 @@ menuName
     data <- Data_All[[input$genderRatio]]$RatioInfo%>%
       filter(population %in% input$ethRatio,
              DHB == "Total")
+    
+    # genderTitle <- switch(input$)
 
+    genderTitle <- switch(input$genderRatio,
+                          "Male" = "Male ",
+                          "Female" = "Female ")
+    
+    # Change Title based on Selection
     titlePlot <- switch(input$ethRatio,
-      "Total" = "Total Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
-      "Maori" = "Maori Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)",
-      "Non-Maori" = "Non-Maori Fully Vaccinated Rate Ratio by Age Group (HSU as baseline)"
+                        "Total" = paste0("Total ", genderTitle,"Fully Vaccinated Rate Ratio by Age Groups"),
+                        "Maori" = paste0("Maori ", genderTitle, "Fully Vaccinated Rate Ratio by Age Groups"),
+                        "Non-Maori" = paste0("Non-Maori ", genderTitle ,"Fully Vaccinated Rate Ratio by Age Groups")
+                        
     )
-
+    
     ratioColour <- switch(input$ethRatio,
       "Non-Maori" = "#06b73c",
       "Total" = "#639bfb",
@@ -321,6 +342,11 @@ menuName
              DHB == "Total")
     widthInfo2 <- c(14,6,4)
     
+    
+    titlePlotGender <- switch(input$genderRatio,
+                        "Male" = "Male ",
+                        "Female" = "Female ")
+    
     figPlot <- data%>%
       plot_ly(x = ~factor(AgeGroup, level = level_order),
               color = ~population)%>%
@@ -343,13 +369,13 @@ menuName
       layout(xaxis = list(title = list(text = "Age Groups",
                                            size = 2),
                               tickangle = 45),
-                 yaxis = list(title = list(text = "Rate Ratio",
+                 yaxis = list(title = list(text = "Rate Difference",
                                            size = 2),
                               zerolinecolor = 'black',
                               zerolinewidth = 2,
                               gridcolor = 'black',
                               hoverformat = '.0f'),
-                 title = list(text = "Fully Vaccinated Rate Ratio by Age Group & Ethnicity (HSU as baseline)",
+                 title = list(text = paste0("Fully ", titlePlotGender,"Vaccinated Rate Ratio by Age Group & Ethnicity (HSU as baseline)"),
                               font=list(size = 15)),
                  plot_bgcolor = 'transparent',
                  paper_bgcolor = 'transparent',
@@ -359,6 +385,126 @@ menuName
     
     suppressWarnings(figPlot)
   })
+  
+  
+  #Rate Difference Plots ----
+  
+  output$rateDiffPlot <- renderPlotly({
+    data <- Data_All[[input$genderDifference]]$RatioInfo%>%
+      filter(population %in% input$ethDifference,
+             DHB == "Total")
+    
+    # genderTitle <- switch(input$)
+    
+    genderTitle <- switch(input$genderDifference,
+                          "Male" = "Male ",
+                          "Female" = "Female ")
+    
+    # Change Title based on Selection
+    titlePlot <- switch(input$ethDifference,
+                        "Total" = paste0("Total ", genderTitle,"Fully Vaccinated Rate Difference by Age Groups"),
+                        "Maori" = paste0("Maori ", genderTitle, "Fully Vaccinated Rate Difference by Age Groups"),
+                        "Non-Maori" = paste0("Non-Maori ", genderTitle ,"Fully Vaccinated Rate Difference by Age Groups")
+                        
+    )
+    
+    ratioColour <- switch(input$ethDifference,
+                          "Non-Maori" = "#06b73c",
+                          "Total" = "#639bfb",
+                          "Maori" = "#fb746c"
+    )
+    
+    figRatio <- data%>%
+      plot_ly(x = ~factor(AgeGroup, level = level_order))%>%
+      add_trace(type = "bar",
+                y = ~AttributableRisk,
+                error_y = ~list(type = "x",
+                                array = AttributableRiskUpr - AttributableRisk,
+                                arrayminus = AttributableRisk - AttributableRiskLwr,
+                                color = 'black',
+                                thickness = 1,
+                                width = 14),
+                text = paste0("Age Group: ", data$AgeGroup,
+                              "<br>Relative Risk: ", round(data$AttributableRisk, 2),
+                              "<br>Gamma Interval: +",
+                              round(data$AttributableRiskUpr - data$AttributableRisk, 4), "/ -",
+                              round(data$AttributableRisk - data$AttributableRiskLwr, 4)),
+                hoverinfo = 'text',
+                showlegend = F,
+                color = ratioColour)
+    
+    figRatio <- figRatio%>%
+      layout(xaxis = list(title = list(text = "Age Groups",
+                                       size = 2),
+                          tickangle = 45),
+             yaxis = list(title = list(text = "Rate Difference",
+                                       size = 2),
+                          zerolinecolor = 'black',
+                          zerolinewidth = 2,
+                          gridcolor = 'black',
+                          hoverformat = '.0f'),
+             title = list(text = titlePlot,
+                          font=list(size = 15)),
+             plot_bgcolor = 'transparent',
+             paper_bgcolor = 'transparent'
+      )
+    
+    suppressWarnings(figRatio)
+    
+  })
+  
+  
+  output$diffCompare <- renderPlotly({
+    
+    data <- Data_All[[input$genderDifference]]$RatioInfo%>%
+      filter(population %in% input$ethDifference2,
+             DHB == "Total")
+    widthInfo2 <- c(14,6,4)
+    
+    
+    titlePlotGender <- switch(input$genderDifference,
+                              "Male" = "Male ",
+                              "Female" = "Female ")
+    
+    figPlot <- data%>%
+      plot_ly(x = ~factor(AgeGroup, level = level_order),
+              color = ~population)%>%
+      add_trace(type = 'bar',
+                y = ~AttributableRisk,
+                # color = ~population,
+                text = paste0("Age Group: ", data$AgeGroup,
+                              "<br>Relative Risk: ", round(data$AttributableRisk, 2),
+                              "<br>Ethnicity: ", data$population,
+                              "<br>Gamma Interval: +",
+                              round(data$AttributableRiskUpr - data$AttributableRisk, 4), "/ -",
+                              round(data$AttributableRisk - data$AttributableRiskLwr, 4)),
+                hoverinfo = 'text')%>%
+      # error_y = ~list(type = "x",
+      #                 array = data$RelativeRiskUpr - data$RelativeRisk,
+      #                 arrayminus = data$RelativeRisk - data$RelativeRiskLwr,
+      #                 color = 'black',
+      #                 thickness = 1,
+      #                 width = 4))%>%
+      layout(xaxis = list(title = list(text = "Age Groups",
+                                       size = 2),
+                          tickangle = 45),
+             yaxis = list(title = list(text = "Rate Ratio",
+                                       size = 2),
+                          zerolinecolor = 'black',
+                          zerolinewidth = 2,
+                          gridcolor = 'black',
+                          hoverformat = '.0f'),
+             title = list(text = paste0("Fully ", titlePlotGender,"Vaccinated Rate Difference by Age Group & Ethnicity (HSU as baseline)"),
+                          font=list(size = 15)),
+             plot_bgcolor = 'transparent',
+             paper_bgcolor = 'transparent',
+             legend = list(bgcolor = 'transparent',
+                           title = list(text = "Population")
+             ))
+    
+    suppressWarnings(figPlot)
+  })
+  
   
   
   #Count Plots ----
@@ -460,21 +606,22 @@ menuName
                      "Nationwide" = Data_All[[input$genderVacc]]$Nationwide%>%
                        filter(ethnicity == input$ethFull),
                      "By DHB" = Data_All[[input$genderVaccDHB]]$DHB%>%
-                       filter(ethnicity == input$ethDHB)
+                       filter(ethnicity == input$ethDHB,
+                              DHB %in% DHBSelected$DHB)
                      )
       
       
       
       datatable(data%>%
-                  select("DHB", "population", "ethnicity",
-                         "AgeGroup", "Count", "Total",
-                         "Rate", "Rate_Gamma1Lwr", "Rate_Gamma1Upr", 
-                         "RateMult", "Variance", 
+                  select("DHB", "ethnicity", "population",
+                         "AgeGroup",
+                         "Rate", "RateMult", 
+                         "Rate_Gamma1Lwr", "Rate_Gamma1Upr", "Variance", 
                          "Weights"),
-                colnames = c("DHB", "Pop.Measure", "Ethnicity",
-                             "Age Group", "Count", "Total",
-                             "Rate", "Gamma Lwr", "Gamma Upr", 
-                             "Rate Multiplier", "Variance", 
+                colnames = c("DHB",  "Ethnicity","Pop.Measure",
+                             "Age Group",
+                             "Rate", "Rate per 100k",
+                             "Gamma Lwr", "Gamma Upr", "Variance", 
                              "Weights"),
                 options = list(scrollX = TRUE)
                 )%>%
@@ -496,6 +643,10 @@ menuName
     
     data <- Data_All[[gender]]$RatioInfo
     
+    # data <- switch(input$ratioTabs,
+    #                "Rate Ratio" = Data_All[[input$genderRatio]]$RatioInfo%>%
+    #                  filter(population == input$ethr))
+    
     datatable(data%>%
                 select("DHB", "AgeGroup", "population",
                        "Count",
@@ -506,13 +657,16 @@ menuName
                        # "RateBaseline", "VarianceBaseline", 
                        # "RateBaselineLwr", "RateBaselineUpr",
                        "RelativeRisk", 
-                       "RelativeRiskLwr", "RelativeRiskUpr"
-                       # "AttributableRisk",
-                       # "AttributableRiskLwr", "AttributableRiskUpr"
+                       "RelativeRiskLwr", "RelativeRiskUpr",
+                       "AttributableRisk",
+                       "AttributableRiskLwr", "AttributableRiskUpr"
                        ),
               colnames = c("DHB", "Age Group", 
                            "Ethnicity", "Count", "Relative Risk",
-                           "Relative Risk Lwr", "Relative Risk Upr"),
+                           "Relative Risk Lwr", "Relative Risk Upr",
+                           "AttributableRisk",
+                           "AttributableRiskLwr", "AttributableRiskUpr"
+              ),
               options = list(scrollX = TRUE))%>%
       formatRound(columns = c(
                               # "Weights", "Rate", 
@@ -522,11 +676,12 @@ menuName
                               # "RateBaseline", "VarianceBaseline",
                               # "RateBaselineLwr", "RateBaselineUpr",
                               "RelativeRisk", 
-                              "RelativeRiskLwr", "RelativeRiskUpr"
-                              # "AttributableRisk",
-                              # "AttributableRiskLwr", "AttributableRiskUpr"
+                              "RelativeRiskLwr", "RelativeRiskUpr",
+                              "AttributableRisk",
+                              "AttributableRiskLwr", "AttributableRiskUpr"
                               ),
-                  digits = c(2,2,2),
+                  digits = c(2,2,2, 
+                             3,3,3),
                   mark = "")
     
   })

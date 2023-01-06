@@ -29,7 +29,7 @@ HSUn.df <- weights.df[-c(2:12),]
 HSUn.df <- pivot_longer(HSUn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights" ) #changing from rows to column
 HSUn.df <- HSUn.df[,c(3,4)] #only showing weights by age-groups
 
-#HSU M훟ri weights
+#HSU M?ori weights
 #using numbers
 HSUMn.df <- weights.df[-c(1:2,4:12),]
 HSUMn.df <- pivot_longer(HSUMn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights" ) #changing from rows to column
@@ -197,6 +197,7 @@ ERP_MFVacc_nontot.df <- ERP_MFVacc_nontot.df %>%
 
 ## Non-M훮ori Fully Vaccinated Rates ----
 # Total fully vaccinated
+# NMFVacc_nontotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "NonMaoriFullVacc")
 NMFVacc_nontotal.df<- subset(NMFVacc_nontotal.df, Group!="Male" & Group!="Female" & DHB!="Total")
 
 NMFVacc_nontotal.df <- pivot_longer(NMFVacc_nontotal.df, cols = 4:20, names_to = "AgeGroup", values_to = "Count" ) #changing from rows to column
@@ -260,6 +261,7 @@ ERP_NMFVacc_nontot.df <- ERP_NMFVacc_nontot.df %>%
     Rate_Gamma1Lwr  = (0.5 * qchisq(alpha / 2, 2 * Count) / Weights)*100000,
     Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
+
 
 ## Rates of DHB Total by Age groups (Total pop) ----
 # Total fully vaccinated
@@ -371,9 +373,11 @@ ERP_MFVacc_DHBtot.df <- ERP_MFVacc_DHBtot.df %>%
     Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
 
+
 ## Rates of DHB Total by Age groups (Non-M훮ori pop) ----
 
 # Total fully vaccinated
+# NMFVacc_DHBtotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "NonMaoriFullVacc")
 NMFVacc_DHBtotal.df<- subset(NMFVacc_DHBtotal.df, Group!="Male" & Group!="Female" & DHB=="Total")
 
 NMFVacc_DHBtotal.df <- pivot_longer(NMFVacc_DHBtotal.df, cols = 3, values_to = "Total" ) #changing from rows to column
@@ -453,9 +457,9 @@ HSUvsERP_NMFVacc_DHB.df <- rbind(
 
 # Rate Ratio Code -----
 
-## Total Vaccinations RR DHB total by agegroups
+## Total Vaccinations RR DHB total by agegroups-----
 
-## code for setting HSU as baseline for Total Vaccinations ----
+## code for setting HSU as baseline for Total Vaccinations
 
 HSU_TFVacc_baseline.total <- HSU_TFVacc_DHBtot.df
 ERP_TFVacc_population.total <- ERP_TFVacc_DHBtot.df
@@ -530,7 +534,11 @@ TFVacc_DHBpopulation.df <- ERP_TFVacc_population.total %>%
   dplyr::select(-RRVarBaseline, -RRVar, -ARVarBaseline, -ARVar) %>%
   dplyr::bind_rows(ERP_TFVacc_population.other)
 
-## code for setting ERP as baseline for M훮ori Vaccinations ----
+
+
+## Total Maori Vaccinations RR ----
+
+## code for setting ERP as baseline for M훮ori Vaccinations
 
 HSU_MFVacc_baseline.total <- HSU_MFVacc_DHBtot.df
 ERP_MFVacc_population.total <- ERP_MFVacc_DHBtot.df
@@ -604,7 +612,9 @@ MFVacc_DHBpopulation.df <- ERP_MFVacc_population.total %>%
   dplyr::bind_rows(ERP_MFVacc_population.other)
 
 
-## code for setting ERP as baseline for Non-M훮ori Vaccinations ---- 
+## Total Non-Maori Vaccinations RR----
+
+## code for setting ERP as baseline for Non-M훮ori Vaccinations
 HSU_NMFVacc_baseline.total <- HSU_NMFVacc_DHBtot.df
 ERP_NMFVacc_population.total <- ERP_NMFVacc_DHBtot.df
 
