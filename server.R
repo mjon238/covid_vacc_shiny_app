@@ -144,7 +144,7 @@ menuName
                                       array = Rate_Gamma1Upr - RateMult,
                                       arrayminus = RateMult - Rate_Gamma1Lwr,
                                       color = 'black',
-                                      width = 6,
+                                      width = 10,
                                       thickness = 1),
                        text = paste0("Age Group: ", data$AgeGroup,
                                     "<br>Rate: ", round(data$RateMult),
@@ -164,10 +164,11 @@ menuName
                           zerolinewidth = 2,
                           gridcolor = 'black',
                           hoverformat = '.0f'),
-             title = list(text = titlePlot,
+             title = list(text = paste0(titlePlot, "<br> <sup> Green: ERP, Blue: HSU </sup>"),
                           font=list(size = 15)),
              plot_bgcolor = 'transparent',
              paper_bgcolor = 'transparent',
+             showlegend = F,
              legend = list(bgcolor = 'transparent',
                            title = list(text = "Population"))
       )
@@ -245,7 +246,7 @@ menuName
                             zerolinewidth = 2,
                             gridcolor = 'black',
                             hoverformat = '.0f'),
-               title = list(text = titlePlot,
+               title = list(text = paste0(titlePlot,"<br> <sup> Green: ERP, Blue: HSU </sup>"),
                             font=list(size = 15)),
                plot_bgcolor = 'transparent',
                paper_bgcolor = 'transparent')
@@ -271,13 +272,14 @@ menuName
   
   #Rate Ratio Plots ----
 
+  
+  #UNUSED
   output$rateRatioPlot <- renderPlotly({
     
     data <- Data_All[[input$genderRatio]]$RatioInfo%>%
       filter(population %in% input$ethRatio,
              DHB == "Total")
     
-    # genderTitle <- switch(input$)
 
     genderTitle <- switch(input$genderRatio,
                           "Male" = "Male ",
@@ -285,33 +287,57 @@ menuName
     
     # Change Title based on Selection
     titlePlot <- switch(input$ethRatio,
-                        "Total" = paste0("Total ", genderTitle,"Fully Vaccinated Rate Ratio by Age Groups"),
-                        "Maori" = paste0("Maori ", genderTitle, "Fully Vaccinated Rate Ratio by Age Groups"),
-                        "Non-Maori" = paste0("Non-Maori ", genderTitle ,"Fully Vaccinated Rate Ratio by Age Groups")
+                        "Total" = paste0("Total ", 
+                                         genderTitle,
+                                         "Fully Vaccinated Rate Ratio by Age Groups"),
+                        "Maori" = paste0("Maori ", 
+                                         genderTitle, 
+                                         "Fully Vaccinated Rate Ratio by Age Groups"),
+                        "Non-Maori" = paste0("Non-Maori ", 
+                                             genderTitle ,
+                                             "Fully Vaccinated Rate Ratio by Age Groups")
                         
     )
     
+    #FIXX
     ratioColour <- switch(input$ethRatio,
       "Non-Maori" = "#06b73c",
       "Total" = "#639bfb",
       "Maori" = "#fb746c"
     )
     
+    dataInterest <- switch(input$ratioTabs,
+                           "Rate Ratio" = data$RelativeRisk,
+                           "Rate Difference" = data$AttributableRisk,
+                           "Count" = data$Count)
+    
+    dataInterestUpr <- switch(input$ratioTabs,
+                           "Rate Ratio" = data$RelativeRiskUpr,
+                           "Rate Difference" = data$AttributableRiskUpr,
+                           "Count" = NULL)
+    
+    dataInterestLwr <- switch(input$ratioTabs,
+                           "Rate Ratio" = data$RelativeRiskLwr,
+                           "Rate Difference" = data$AttributableRiskLwr,
+                           "Count" = NULL)
+    
+    
     figRatio <- data%>%
       plot_ly(x = ~factor(AgeGroup, level = level_order))%>%
       add_trace(type = "bar",
-                y = ~RelativeRisk,
+                y = ~dataInterest,
                 error_y = ~list(type = "x",
-                                array = RelativeRiskUpr - RelativeRisk,
-                                arrayminus = RelativeRisk - RelativeRiskLwr,
+                                array = dataInterestUpr - dataInterest,
+                                arrayminus = dataInterest - dataInterestLwr,
                                 color = 'black',
                                 thickness = 1,
                                 width = 14),
                 text = paste0("Age Group: ", data$AgeGroup,
-                              "<br>Relative Risk: ", round(data$RelativeRisk, 2),
+                              "<br>Relative Risk: ", round(dataInterest, 2),
                               "<br>Gamma Interval: +",
-                              round(data$RelativeRiskUpr - data$RelativeRisk, 4), "/ -",
-                              round(data$RelativeRisk - data$RelativeRiskLwr, 4)),
+                              round(dataInterestUpr - dataInterest, 4), 
+                              "/ -",
+                              round(dataInterest - dataInterestLwr, 4)),
                 hoverinfo = 'text',
                 showlegend = F,
                 color = ratioColour)
@@ -337,264 +363,91 @@ menuName
 
   output$ratioComparsion <- renderPlotly({
     
+    
     data <- Data_All[[input$genderRatio]]$RatioInfo%>%
+      arrange(`population`)%>%
       filter(population %in% input$ethRatio2,
              DHB == "Total")
+    
+    dataInterest <- switch(input$ratioTabs,
+                           "Rate Ratio" = data$RelativeRisk,
+                           "Rate Difference" = data$AttributableRisk,
+                           "Count" = data$Count)
+    
+    dataInterestUpr <- switch(input$ratioTabs,
+                              "Rate Ratio" = data$RelativeRiskUpr,
+                              "Rate Difference" = data$AttributableRiskUpr,
+                              "Count" = NULL)
+    
+    dataInterestLwr <- switch(input$ratioTabs,
+                              "Rate Ratio" = data$RelativeRiskLwr,
+                              "Rate Difference" = data$AttributableRiskLwr,
+                              "Count" = NULL)
+    
+   
+    
+    
     widthInfo2 <- c(14,6,4)
     
     
     titlePlotGender <- switch(input$genderRatio,
                         "Male" = "Male ",
-                        "Female" = "Female ")
+                        "Female" = "Female ",
+                        "Total" = NULL)
+    
+    removeName <- case_when(input$ratioTabs == "Count" ~ "",
+                            TRUE ~ "(HSU as baseline)")
+    
+    
+    #COLOURS
+    #Non-Maori = #fc8d62
+    #Total = #8da0cb
+    #Maori = #66c2a5
     
     figPlot <- data%>%
       plot_ly(x = ~factor(AgeGroup, level = level_order),
               color = ~population)%>%
       add_trace(type = 'bar',
-                y = ~RelativeRisk,
-                # color = ~population,
+                y = ~dataInterest,
                 text = paste0("Age Group: ", data$AgeGroup,
-                              "<br>Relative Risk: ", round(data$RelativeRisk, 2),
+                              "<br>Relative Risk: ", round(dataInterest, 2),
                               "<br>Ethnicity: ", data$population,
                               "<br>Gamma Interval: +",
-                              round(data$RelativeRiskUpr - data$RelativeRisk, 4), "/ -",
-                              round(data$RelativeRisk - data$RelativeRiskLwr, 4)),
-                hoverinfo = 'text')%>%
-                # error_y = ~list(type = "x",
-                #                 array = data$RelativeRiskUpr - data$RelativeRisk,
-                #                 arrayminus = data$RelativeRisk - data$RelativeRiskLwr,
-                #                 color = 'black',
-                #                 thickness = 1,
-                #                 width = 4))%>%
+                              round(dataInterestUpr - dataInterest, 4), "/ -",
+                              round(dataInterest - dataInterestLwr, 4)),
+                hoverinfo = 'text',
+                error_y = ~list(type = "x",
+                                array = dataInterestUpr - dataInterest,
+                                arrayminus = dataInterest - dataInterestLwr,
+                                color = 'black',
+                                thickness = 1,
+                                width = widthInfo2[[length(input$ethRatio2)]]))%>%
       layout(xaxis = list(title = list(text = "Age Groups",
                                            size = 2),
                               tickangle = 45),
-                 yaxis = list(title = list(text = "Rate Difference",
+                 yaxis = list(title = list(text = paste0(input$ratioTabs),
                                            size = 2),
                               zerolinecolor = 'black',
                               zerolinewidth = 2,
                               gridcolor = 'black',
                               hoverformat = '.0f'),
-                 title = list(text = paste0("Fully ", titlePlotGender,"Vaccinated Rate Ratio by Age Group & Ethnicity (HSU as baseline)"),
+                 title = list(text = paste0("Fully ", 
+                                            titlePlotGender,
+                                            "Vaccinated ", 
+                                            input$ratioTabs,
+                                            " by Age Group & Ethnicity ",
+                                            removeName),
                               font=list(size = 15)),
                  plot_bgcolor = 'transparent',
                  paper_bgcolor = 'transparent',
              legend = list(bgcolor = 'transparent',
-                           title = list(text = "Population")
+                           title = list(text = "Ethnicity")
       ))
     
     suppressWarnings(figPlot)
   })
   
-  
-  #Rate Difference Plots ----
-  
-  output$rateDiffPlot <- renderPlotly({
-    data <- Data_All[[input$genderDifference]]$RatioInfo%>%
-      filter(population %in% input$ethDifference,
-             DHB == "Total")
-    
-    # genderTitle <- switch(input$)
-    
-    genderTitle <- switch(input$genderDifference,
-                          "Male" = "Male ",
-                          "Female" = "Female ")
-    
-    # Change Title based on Selection
-    titlePlot <- switch(input$ethDifference,
-                        "Total" = paste0("Total ", genderTitle,"Fully Vaccinated Rate Difference by Age Groups"),
-                        "Maori" = paste0("Maori ", genderTitle, "Fully Vaccinated Rate Difference by Age Groups"),
-                        "Non-Maori" = paste0("Non-Maori ", genderTitle ,"Fully Vaccinated Rate Difference by Age Groups")
-                        
-    )
-    
-    ratioColour <- switch(input$ethDifference,
-                          "Non-Maori" = "#06b73c",
-                          "Total" = "#639bfb",
-                          "Maori" = "#fb746c"
-    )
-    
-    figRatio <- data%>%
-      plot_ly(x = ~factor(AgeGroup, level = level_order))%>%
-      add_trace(type = "bar",
-                y = ~AttributableRisk,
-                error_y = ~list(type = "x",
-                                array = AttributableRiskUpr - AttributableRisk,
-                                arrayminus = AttributableRisk - AttributableRiskLwr,
-                                color = 'black',
-                                thickness = 1,
-                                width = 14),
-                text = paste0("Age Group: ", data$AgeGroup,
-                              "<br>Relative Risk: ", round(data$AttributableRisk, 2),
-                              "<br>Gamma Interval: +",
-                              round(data$AttributableRiskUpr - data$AttributableRisk, 4), "/ -",
-                              round(data$AttributableRisk - data$AttributableRiskLwr, 4)),
-                hoverinfo = 'text',
-                showlegend = F,
-                color = ratioColour)
-    
-    figRatio <- figRatio%>%
-      layout(xaxis = list(title = list(text = "Age Groups",
-                                       size = 2),
-                          tickangle = 45),
-             yaxis = list(title = list(text = "Rate Difference",
-                                       size = 2),
-                          zerolinecolor = 'black',
-                          zerolinewidth = 2,
-                          gridcolor = 'black',
-                          hoverformat = '.0f'),
-             title = list(text = titlePlot,
-                          font=list(size = 15)),
-             plot_bgcolor = 'transparent',
-             paper_bgcolor = 'transparent'
-      )
-    
-    suppressWarnings(figRatio)
-    
-  })
-  
-  
-  output$diffCompare <- renderPlotly({
-    
-    data <- Data_All[[input$genderDifference]]$RatioInfo%>%
-      filter(population %in% input$ethDifference2,
-             DHB == "Total")
-    widthInfo2 <- c(14,6,4)
-    
-    
-    titlePlotGender <- switch(input$genderDifference,
-                              "Male" = "Male ",
-                              "Female" = "Female ")
-    
-    figPlot <- data%>%
-      plot_ly(x = ~factor(AgeGroup, level = level_order),
-              color = ~population)%>%
-      add_trace(type = 'bar',
-                y = ~AttributableRisk,
-                # color = ~population,
-                text = paste0("Age Group: ", data$AgeGroup,
-                              "<br>Relative Risk: ", round(data$AttributableRisk, 2),
-                              "<br>Ethnicity: ", data$population,
-                              "<br>Gamma Interval: +",
-                              round(data$AttributableRiskUpr - data$AttributableRisk, 4), "/ -",
-                              round(data$AttributableRisk - data$AttributableRiskLwr, 4)),
-                hoverinfo = 'text')%>%
-      # error_y = ~list(type = "x",
-      #                 array = data$RelativeRiskUpr - data$RelativeRisk,
-      #                 arrayminus = data$RelativeRisk - data$RelativeRiskLwr,
-      #                 color = 'black',
-      #                 thickness = 1,
-      #                 width = 4))%>%
-      layout(xaxis = list(title = list(text = "Age Groups",
-                                       size = 2),
-                          tickangle = 45),
-             yaxis = list(title = list(text = "Rate Ratio",
-                                       size = 2),
-                          zerolinecolor = 'black',
-                          zerolinewidth = 2,
-                          gridcolor = 'black',
-                          hoverformat = '.0f'),
-             title = list(text = paste0("Fully ", titlePlotGender,"Vaccinated Rate Difference by Age Group & Ethnicity (HSU as baseline)"),
-                          font=list(size = 15)),
-             plot_bgcolor = 'transparent',
-             paper_bgcolor = 'transparent',
-             legend = list(bgcolor = 'transparent',
-                           title = list(text = "Population")
-             ))
-    
-    suppressWarnings(figPlot)
-  })
-  
-  
-  
-  #Count Plots ----
-  
-  output$ratioCountPlot <- renderPlotly({
-    
-    data <- Data_All[[input$genderCount]]$RatioInfo%>%
-      filter(population %in% input$ethCount,
-             DHB == "Total")
-    
-    
-    titlePlot <- switch(input$ethCount,
-                        "Total" = "Total Fully Vaccinated Count by Age Group (HSU as baseline)",
-                        "Maori" = "Maori Fully Vaccinated Count by Age Group (HSU as baseline)",
-                        "Non-Maori" = "Non-Maori Fully Vaccinated Count by Age Group (HSU as baseline)"
-    )
-    
-    ratioColour <- switch(input$ethCount,
-                          "Non-Maori" = "#06b73c",
-                          "Total" = "#639bfb",
-                          "Maori" = "#fb746c"
-    )
-    
-    figRatio <- data%>%
-      plot_ly(x = ~factor(AgeGroup, level = level_order))%>%
-      add_trace(type = "bar",
-                y = ~Count,
-                text = paste0("Age Group: ", data$AgeGroup,
-                              "<br>Count: ", data$Count),
-                hoverinfo = 'text',
-                showlegend = F,
-                color = ratioColour)
-    
-    figRatio <- figRatio%>%
-      layout(xaxis = list(title = list(text = "Age Groups",
-                                       size = 2),
-                          tickangle = 45),
-             yaxis = list(title = list(text = "Count",
-                                       size = 2),
-                          zerolinecolor = 'black',
-                          zerolinewidth = 2,
-                          gridcolor = 'black',
-                          hoverformat = '.0f'),
-             title = list(text = titlePlot,
-                          font=list(size = 15)),
-             plot_bgcolor = 'transparent',
-             paper_bgcolor = 'transparent'
-      )
-    
-    figRatio
-    
-    
-  })
-  
-  output$countCompare <- renderPlotly({
-    data <- Data_All[[input$genderCount]]$RatioInfo %>%
-      filter(population %in% input$ethCount2,
-             DHB == "Total")
-    widthInfo2 <- c(14,6,4)
-    
-    figPlot <- data%>%
-      plot_ly(x = ~factor(AgeGroup, level = level_order),
-              color = ~population)%>%
-      add_trace(type = 'bar',
-                y = ~Count,
-                text = paste0("Age Group: ", data$AgeGroup,
-                              "<br>Count: ", round(data$Count),
-                              "<br>Ethnicity: ", data$population),
-                hoverinfo = 'text')%>%
-      layout(xaxis = list(title = list(text = "Age Groups",
-                                       size = 2),
-                          tickangle = 45),
-             yaxis = list(title = list(text = "Count",
-                                       size = 2),
-                          zerolinecolor = 'black',
-                          zerolinewidth = 2,
-                          gridcolor = 'black',
-                          hoverformat = '.0f'),
-             title = list(text = "Fully Vaccinated Count by Age Group & Ethnicity (HSU as baseline)",
-                          font=list(size = 15)),
-             plot_bgcolor = 'transparent',
-             paper_bgcolor = 'transparent',
-             legend = list(bgcolor = 'transparent',
-                           title = list(text = "Population")
-             ))
-    
-    
-  })
-  
-  
+
   
   
   #Data Tables ----
@@ -636,16 +489,12 @@ menuName
   
   
   output$tableRate <- renderDataTable({
-    gender <- switch(input$ratioTabs,
-                     "Rate Ratio" = input$genderRatio,
-                     "Rate Difference" = input$genderDifference,
-                     "Count" = input$genderCount)
+
+    data <- Data_All[[input$genderRatio]]$RatioInfo%>%
+      arrange(`population`)%>%
+      filter(population %in% input$ethRatio2,
+             DHB == "Total")
     
-    data <- Data_All[[gender]]$RatioInfo
-    
-    # data <- switch(input$ratioTabs,
-    #                "Rate Ratio" = Data_All[[input$genderRatio]]$RatioInfo%>%
-    #                  filter(population == input$ethr))
     
     datatable(data%>%
                 select("DHB", "AgeGroup", "population",

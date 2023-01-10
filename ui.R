@@ -15,7 +15,7 @@
       sidebarMenu(
         id = "items",
         menuItem(tabName = "vacc", "HSU vs. ERP Data"),
-        menuItem(tabName = "ratio", "Rate Ratios")
+        menuItem(tabName = "ratio", "Compare")
       ),
       div(style = "margin-top: -10px;"),
       hr(),
@@ -27,7 +27,8 @@
       
         #Nationwide Tab ----
       conditionalPanel(
-        condition = "input.items == 'vacc' && input.vaccType == 'Nationwide'",
+        condition = "input.items == 'vacc' 
+        && input.vaccType == 'Nationwide'",
         
         #Date
         selectInput(
@@ -122,12 +123,26 @@
         )
       ),
       
-      ## Ratio Rates Inputs ----
       
-      #Gender Inputs
+      
+      
+      ## Ratio Rates Inputs ----
+      conditionalPanel(condition = "input.items == 'ratio'",
+                       selectInput(inputId = "ratioTabs",
+                                   label = "Select Comparison",
+                                   choices = c("Rate Ratio",
+                                               "Rate Difference",
+                                               "Count"),
+                                   selected = "Rate Ratio",
+                                   selectize = F),
+                       hr(),
+                       div(style = "margin-bottom: -20px;")
+                       
+                       
+      ),
+      
       conditionalPanel(
-        condition = "input.items == 'ratio' 
-        && input.ratioTabs == 'Rate Ratio'",
+        condition = "input.items == 'ratio'",
         
         #Date
         selectInput(
@@ -150,34 +165,34 @@
         hr(),
         div(style = "margin-bottom: -20px;")),
       
+      
+      
         #Ratio Rates Single Inputs -----
-      conditionalPanel(
-        condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Rate Ratio'
-        && input.ratioCompare1 == 'Single'",
-        
-        #Ethinicty
-        selectInput(
-          inputId = "ethRatio",
-          label = "Select Ethnicity",
-          choices = c("Total", "Maori"
-                      , "Non-Maori"
-                      ),
-          selected = "Total",
-          selectize = F
-        )),
+      # conditionalPanel(
+      #   condition = "input.items == 'ratio'
+      #   && input.ratioCompare1 == 'Single'",
+      #   
+      #   #Ethinicty
+      #   selectInput(
+      #     inputId = "ethRatio",
+      #     label = "Select Ethnicity",
+      #     choices = c("Total", "Maori"
+      #                 , "Non-Maori"
+      #                 ),
+      #     selected = "Total",
+      #     selectize = F
+      #   )),
       
       
         #Ratio Rates Compare Inputs -----
       conditionalPanel(
-        condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Rate Ratio'
-        && input.ratioCompare1 == 'Compare'",
+        condition = "input.items == 'ratio'",
+        # && input.ratioCompare1 == 'Compare'",
         
         #Ethnicity
       pickerInput(
         inputId = "ethRatio2",
-        label = "Select Ethnicity's To Compare",
+        label = "Select Ethnicities To Compare",
         choices = c("Total", "Maori"
                     , "Non-Maori"
                     ),
@@ -186,142 +201,8 @@
                      ),
         multiple = T
       )
-      ),
-      
-      
-      #Count Inputs ----
-      
-      
-      
-      #Gender
-      conditionalPanel(
-        condition = "input.items == 'ratio' 
-        && input.ratioTabs == 'Count'",
-        
-        #Date
-        selectInput(
-          inputId = "dateCount",
-          label = "Select Date",
-          choices = c("2021-11-01"),
-          selected = "2021-11-01",
-          selectize = F
-        ),
-        hr(),
-        div(style = "margin-bottom: -20px;"),
-        
-        selectInput(
-          inputId = "genderCount",
-          label = "Select Sex",
-          choices = c("Total", "Male", "Female"),
-          selected = "Total",
-          selectize = F
-        ),
-        hr(),
-        div(style = "margin-bottom: -20px;")),
-      
-      
-        #Count Single Inputs ----
-      conditionalPanel(
-        condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Count'
-        && input.ratioCompare2 == 'Single'",
-        
-        #Ethnicity
-        selectInput(
-          inputId = "ethCount",
-          label = "Select Ethnicity",
-          choices = c("Total", "Maori"
-                      , "Non-Maori"
-                      ),
-          selected = "Total",
-          selectize = F
-        )),
-      
-        #Count Compare Inputs ----
-      conditionalPanel(
-        condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Count'
-        && input.ratioCompare2 == 'Compare'",
-        
-        #Ethnicity
-        pickerInput(
-          inputId = "ethCount2",
-          label = "Select Ethnicity's To Compare",
-          choices = c("Total", "Maori"
-                      , "Non-Maori"
-                      ),
-          selected = c("Total", "Maori"
-                       , "Non-Maori"
-                       ),
-          multiple = T
-        )),
-
-    
-    #Difference Inputs ----
-    
-    #Gender
-    conditionalPanel(
-      condition = "input.items == 'ratio' 
-        && input.ratioTabs == 'Rate Difference'",
-      
-      #Date
-      selectInput(
-        inputId = "dateDifference",
-        label = "Select Date",
-        choices = c("2021-11-01"),
-        selected = "2021-11-01",
-        selectize = F
-      ),
-      hr(),
-      div(style = "margin-bottom: -20px;"),
-      
-      #Gender
-      selectInput(
-        inputId = "genderDifference",
-        label = "Select Sex",
-        choices = c("Total", "Male", "Female"),
-        selected = "Total",
-        selectize = F
-      ),
-      hr(),
-      div(style = "margin-bottom: -20px;")),
-    
-    
-       #Difference Single Inputs ----
-    conditionalPanel(
-      condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Rate Difference'
-        && input.ratioCompare3 == 'Single'",
-      
-      #Ethnicity
-      selectInput(
-        inputId = "ethDifference",
-        label = "Select Ethnicity",
-        choices = c("Total", "Maori"
-                    , "Non-Maori"
-                    ),
-        selected = "Total",
-        selectize = F
-      )),
-    
-       #Difference Compare Inputs ----
-    conditionalPanel(
-      condition = "input.items == 'ratio'
-        && input.ratioTabs == 'Rate Difference'
-        && input.ratioCompare3 == 'Compare'",
-      
-      #Ethnicity
-      pickerInput(
-        inputId = "ethDifference2",
-        label = "Select Ethnicity's To Compare",
-        choices = c("Total", "Maori"
-                    , "Non-Maori"
-                    ),
-        selected = c("Total", "Maori"
-                     , "Non-Maori"
-                     ),
-        multiple = T
-      ))
+      )
+   
   ),
 
 
@@ -378,7 +259,7 @@
             "Nationwide",
             uiOutput("chartTitle1"),
             br(),
-            plotlyOutput("fullyVaccPlot", width = "800px", height = "400px")
+            plotlyOutput("fullyVaccPlot", width = "1200px", height = "600px")
             
           ),
           
@@ -387,7 +268,6 @@
             "By DHB",
             uiOutput("chartTitle2"),
             br(),
-            # box(width = 12, height = 12, style = "overflow-y: auto; overflow-x: auto;",
             plotlyOutput("plotDHB", width = "1200px", height = "600px")
             
           )
@@ -396,74 +276,31 @@
       
       
       #Ratio Item Outputs ----
-      conditionalPanel(
-        condition = "input.items == 'ratio'",
-        tabsetPanel(
-          id = "ratioTabs",
-          
-          
+
           #Ratio Rates Tab ----
-          tabPanel(
-            "Rate Ratio",
+        conditionalPanel(condition = "input.items == 'ratio'",
             uiOutput("chartTitle3"),
             
             br(),
             
-            #Single ----
-          conditionalPanel(condition = "input.ratioCompare1 == 'Single'",
-            plotlyOutput("rateRatioPlot", width = "800px")),
+          #   #Single ----
+          # conditionalPanel(condition = "input.ratioCompare1 == 'Single'",
+          #   plotlyOutput("rateRatioPlot", width = "800px"),
+          #   ),
           
             #Compare ----
-          conditionalPanel(condition = "input.ratioCompare1 == 'Compare'",
-                           plotlyOutput("ratioComparsion", width = "800px")),
+          # conditionalPanel(condition = "input.ratioCompare1 == 'Compare'",
+                           plotlyOutput("ratioComparsion", width = "800px")
           
-          radioGroupButtons(inputId = "ratioCompare1",
-                            label = "Plot View",
-                            choices = c("Single", "Compare"),
-                            selected = "Single")
+          
           ),
-          
-          #Rate Difference Tab ----
-          tabPanel("Rate Difference",
-                   uiOutput("chartTitle4"),
-                   br(),
-                   
-                   conditionalPanel(condition = "input.ratioCompare3 == 'Single'",
-                                    plotlyOutput("rateDiffPlot", width = "800px")),
-                   
-                   #Compare ----
-                   conditionalPanel(condition = "input.ratioCompare3 == 'Compare'",
-                                    plotlyOutput("diffCompare", width = "800px")
-                                    ),
-                   
-          radioGroupButtons(inputId = "ratioCompare3",
-                            label = "Plot View",
-                            choices = c("Single", "Compare"),
-                            selected = "Single")
-          ),
-          
-          #Count Outputs ----
-          tabPanel(
-            "Count",
-            uiOutput("chartTitle5"),
-            
-            br(),
-            
-            #Single ----
-            conditionalPanel(condition = "input.ratioCompare2 == 'Single'",
-                             plotlyOutput("ratioCountPlot", width = "800px")),
-            
-            #Compare ----
-            conditionalPanel(condition = "input.ratioCompare2 == 'Compare'",
-                             plotlyOutput("countCompare", width = "800px")),
-            radioGroupButtons(inputId = "ratioCompare2",
-                              label = "Plot View",
-                              choices = c("Single", "Compare"),
-                              selected = "Single")
-            
-          )
-        )
-      ),
+      
+    
+      # conditionalPanel(condition = "input.items == 'ratio'",
+      #                  radioGroupButtons(inputId = "ratioCompare1",
+      #                                    label = "Plot View",
+      #                                    choices = c("Single", "Compare"),
+      #                                    selected = "Compare")),
       hr(),
       
       #Text Information ----
@@ -496,5 +333,3 @@
       
     )
   )
-# )
-# )
