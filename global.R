@@ -13,6 +13,8 @@ library(patchwork)
 library(ggnewscale)
 library(tidyr)
 library(DT)
+library(orca)
+library(processx)
 
 #Load the Data
 load("data/shiny_app_data.Rmd")

@@ -437,8 +437,8 @@ HSUvsERP_MFVacc_DHB_SFtot.df <- rbind(
 )
 
 HSUvsERP_NMFVacc_DHB_SFtot.df <- rbind(
-  data.frame(HSU_MFVacc_DHB_SFtot.df, population = "HSU"),
-  data.frame(ERP_MFVacc_DHB_SFtot.df, population = "ERP")
+  data.frame(HSU_NMFVacc_DHB_SFtot.df, population = "HSU"),
+  data.frame(ERP_NMFVacc_DHB_SFtot.df, population = "ERP")
 )
 
 
@@ -703,14 +703,57 @@ AllFVacc_DHB_SFpopulation.df <- rbind(
   data.frame(NMFVacc_DHB_SFpopulation.df, population = "Non-Maori")
 )
 
+#Change Total to Nationwide
+AllFVacc_DHB_SFpopulation.df$DHB <- gsub("Total", "Nationwide", AllFVacc_DHB_SFpopulation.df$DHB)
+
+
+#Combine Nationwide and DHB
+Fully_Vacc.df <- rbind(Fully_Vacc_NW.df, Fully_Vacc_DHB.df)
+
+#Change Total to Nationwide
+Fully_Vacc.df$DHB <- gsub("Total", "Nationwide", Fully_Vacc.df$DHB)
+
+#ADD HSU To Ratio Data, BY First Extracting, Renaming and Merging
+
+#1. Extract
+HSUOnly <- Fully_Vacc.df%>%
+  filter(population == "HSU")%>%
+  select(-c(population))%>%
+  rename(population = ethnicity)
+
+colnames(HSUOnly) <- gsub(pattern = "Rate", 
+                          replacement = "HSU_Rate", 
+                          colnames(HSUOnly))
+colnames(HSUOnly) <- gsub(pattern = "Variance",
+                          replacement = "HSU_Variance",
+                          colnames(HSUOnly))
+colnames(HSUOnly) <- gsub(pattern = "Weights",
+                          replacement = "HSU_Weights",
+                          colnames(HSUOnly))
+
+#2. Rename
+colnames(AllFVacc_DHB_SFpopulation.df) <- gsub(pattern = "Rate", 
+                                               replacement = "ERP_Rate", 
+                                               colnames(
+                                                 AllFVacc_DHB_SFpopulation.df))
+
+colnames(AllFVacc_DHB_SFpopulation.df) <- gsub(pattern = "Variance",
+                                               replacement = "ERP_Variance",
+                                               colnames(AllFVacc_DHB_SFpopulation.df))
+
+colnames(AllFVacc_DHB_SFpopulation.df) <- gsub(pattern = "Weights",
+                                               replacement = "ERP_Weights",
+                                               colnames(AllFVacc_DHB_SFpopulation.df))
+
+
+#3. Merge
+AllFVacc_DHB_SFpopulation.df <- merge(HSUOnly, AllFVacc_DHB_SFpopulation.df,
+                                   by = c("DHB", "AgeGroup", "population",
+                                                                                 "Count", "Total"))
 
 #Collate All Data Into a List -----
-DataFemale <- list(Nationwide = Fully_Vacc_NW.df,
-                  DHB = Fully_Vacc_DHB.df,
+DataFemale <- list(HSUvsERP = Fully_Vacc.df,
                   RatioInfo = AllFVacc_DHB_SFpopulation.df)
 
-
-#Remove Everything except all data
-rm(list=setdiff(ls(), c("DataTotal", "DataFemale", "DataMale")))
 
 

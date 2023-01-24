@@ -5,7 +5,7 @@ account: mjon238
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7642510
-bundleId: 6702546
+bundleId: 6736704
 url: https://mjon238.shinyapps.io/covid_vacc_shiny_app/
-when: 1672971944.18091
-lastSyncTime: 1672971944.18091
+when: 1673814232.88654
+lastSyncTime: 1673814232.88654

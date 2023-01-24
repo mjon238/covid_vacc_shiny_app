@@ -14,8 +14,8 @@
       tags$head(tags$style(".wrapper {overflow: visible !important;}")),
       sidebarMenu(
         id = "items",
-        menuItem(tabName = "vacc", "HSU vs. ERP Data"),
-        menuItem(tabName = "ratio", "Compare")
+        menuItem(tabName = "vacc", "Comparing HSU & ERP"),
+        menuItem(tabName = "ratio", "Comparing Ethnicities")
       ),
       div(style = "margin-top: -10px;"),
       hr(),
@@ -25,16 +25,16 @@
       #Need this to activate hide/show input functions
       useShinyjs(),
       
-        #Nationwide Tab ----
-      conditionalPanel(
-        condition = "input.items == 'vacc' 
-        && input.vaccType == 'Nationwide'",
-        
+      conditionalPanel(condition = 
+                         "input.items == 'vacc'",
+
+
         #Date
         selectInput(
           inputId = "dateFull",
           label = "Select Date",
-          choices = c("2021-11-01"),
+          choices = c("2021-11-01",
+                      "2023-01-17"),
           selected = "2021-11-01",
           selectize = F
         ),
@@ -59,47 +59,26 @@
           choices = c("Total", "Maori", "Non-Maori"),
           selected = "Total",
           selectize = F
-        )
         ),
+        
+        hr(),
+        div(style = "margin-bottom: -20px;"),
+        
+        
+        
+        selectInput(inputId = 'region',
+                    label = "Select Region",
+                    choices = c("Nationwide", "By DHB"),
+                    selected = "Nationwide",
+                    selectize = F)
+      ),
 
-        #DHB Only Tab ----
       conditionalPanel(
-        condition = "input.items == 'vacc' && input.vaccType == 'By DHB'",
+        condition = "input.items == 'vacc'
+        && input.region == 'By DHB'",
         
-        #Date
-        selectInput(
-          inputId = "dateDHB",
-          label = "Select Date",
-          choices = c("2021-11-01"),
-          selected = "2021-11-01",
-          selectize = F
-        ),
-        hr(),
-        div(style = "margin-bottom: -20px;"),
+        div(style = "margin-bottom: -10px;"),
         
-        #Gender
-        selectInput(
-          inputId = "genderVaccDHB",
-          label = "Select Sex",
-          choices = c("Total", "Male", "Female"),
-          selected = "Total",
-          selectize = F
-        ),
-        hr(),
-        div(style = "margin-bottom: -20px;"),
-        
-        #Ethnicity
-        selectInput(
-          inputId = "ethDHB",
-          label = "Select Ethnicity",
-          choices = c("Total", "Maori"
-                      ,"Non-Maori"
-                      ),
-          selected = "Total",
-          selectize = F
-        ),
-        hr(),
-        div(style = "margin-bottom: -20px;"),
         
         #DHB Group
         selectInput(inputId = "groupDHB",
@@ -109,7 +88,9 @@
                                 "South Island", "Select DHB\'s"),
                     selected = "All",
                     selectize = F),
+        
         div(style = "margin-bottom: -10px;"),
+        
         
         #Select DHB
         pickerInput(
@@ -121,34 +102,33 @@
           multiple = TRUE,
           options = list(`actions-box` = TRUE)
         )
+        
       ),
       
-      
-      
-      
+
       ## Ratio Rates Inputs ----
       conditionalPanel(condition = "input.items == 'ratio'",
+                       
+                       
+
                        selectInput(inputId = "ratioTabs",
                                    label = "Select Comparison",
-                                   choices = c("Rate Ratio",
+                                   choices = c("HSU Rate",
+                                               "ERP Rate",
+                                               "Rate Ratio",
                                                "Rate Difference",
                                                "Count"),
                                    selected = "Rate Ratio",
                                    selectize = F),
                        hr(),
-                       div(style = "margin-bottom: -20px;")
+                       div(style = "margin-bottom: -20px;"),
                        
-                       
-      ),
-      
-      conditionalPanel(
-        condition = "input.items == 'ratio'",
-        
         #Date
         selectInput(
           inputId = "dateRatio",
           label = "Select Date",
-          choices = c("2021-11-01"),
+          choices = c("2021-11-01",
+                      "2023-01-17"),
           selected = "2021-11-01",
           selectize = F
         ),
@@ -163,32 +143,9 @@
           selectize = F
         ),
         hr(),
-        div(style = "margin-bottom: -20px;")),
+        div(style = "margin-bottom: -20px;"),
       
-      
-      
-        #Ratio Rates Single Inputs -----
-      # conditionalPanel(
-      #   condition = "input.items == 'ratio'
-      #   && input.ratioCompare1 == 'Single'",
-      #   
-      #   #Ethinicty
-      #   selectInput(
-      #     inputId = "ethRatio",
-      #     label = "Select Ethnicity",
-      #     choices = c("Total", "Maori"
-      #                 , "Non-Maori"
-      #                 ),
-      #     selected = "Total",
-      #     selectize = F
-      #   )),
-      
-      
-        #Ratio Rates Compare Inputs -----
-      conditionalPanel(
-        condition = "input.items == 'ratio'",
-        # && input.ratioCompare1 == 'Compare'",
-        
+    
         #Ethnicity
       pickerInput(
         inputId = "ethRatio2",
@@ -200,7 +157,50 @@
                      , "Non-Maori"
                      ),
         multiple = T
-      )
+      ),
+      hr(),
+      div(style = "margin-bottom: -20px;"),
+      
+      
+      
+      selectInput(inputId = 'region2',
+                  label = "Select Region",
+                  choices = c("Nationwide", "By DHB"),
+                  selected = "Nationwide",
+                  selectize = F)      
+      
+      ),
+      
+      conditionalPanel(
+        condition = "input.items == 'ratio'
+        && input.region2 == 'By DHB'",
+        
+        div(style = "margin-bottom: -10px;"),
+        
+        
+        #DHB Group
+        selectInput(inputId = "groupDHB2",
+                    label = "Select DHB Groups",
+                    choices = c("All", 
+                                "Auckland Region", "Wellington Region", "North Island",
+                                "South Island", "Select DHB\'s"),
+                    selected = "All",
+                    selectize = F),
+        
+        div(style = "margin-bottom: -10px;"),
+        
+        
+        #Select DHB
+        pickerInput(
+          inputId = "DHB2",
+          label = "Select DHB",
+          choices = listOfDHB,
+          selected = "Auckland",
+          width = "200px",
+          multiple = TRUE,
+          options = list(`actions-box` = TRUE)
+        )
+        
       )
    
   ),
@@ -247,89 +247,109 @@
       
       #Title ----
       uiOutput(outputId = "graphTitle"),
+      div(style = "margin-top: 10px;"),
       
-      #HSU vs. ERP Output -----
+      
       conditionalPanel(
         condition = "input.items == 'vacc'",
-        tabsetPanel(
-          id = "vaccType",
-          
-          #Nationwide Tab ----
-          tabPanel(
-            "Nationwide",
-            uiOutput("chartTitle1"),
-            br(),
-            plotlyOutput("fullyVaccPlot", width = "1200px", height = "600px")
+        
+        
+        
+        tabsetPanel(id = "tabVacc",
+                    
+                    tabPanel("Charts",
+                             div(style = "margin-top: 10px;"),
+                             
+                             uiOutput("chartTitle2"),
+                             br(),
+                             plotlyOutput("plotDHB", width = "1200px", height = "700px")
+                    ),
+                    tabPanel("Raw Data",
+                             div(style = "margin-top: 10px;"),
+                             
+                             uiOutput("rawDataTitle1"),
+                             DTOutput("tableFull")
+                    ),
+                    tabPanel("Brief Information",
+                             div(style = "margin-top: 10px;"),
+                             
+                             fluidRow(column(12, 
+                                             uiOutput("textHSUvsERP")
+                                     
+                    ))),
+                    tabPanel("Download",
+                             div(style = "margin-top: 10px;"),
+                             uiOutput("downloadTextMain2"),
+                             br(),
+                             
+                             uiOutput("fullDataDownloadTitle"),
+                             downloadButton("downloadFullData", "Download Raw Data"),
+                             
+                             br(),
+                             div(style = "margin-top: 20px;"),
+                             uiOutput("fullChartDownloadTitle"),
+                             downloadButton("downloadFullPlot", "Download Plot"),
+                             
+                             br(),
+                             div(style = "margin-top: 20px;"),
+                             uiOutput("fullRawDataDownload"),
+                             downloadButton("downloadFullRawData", "Download Complete Raw Data")
+                             
+                             
+                    )
+                    )
             
-          ),
-          
-          #DHB Tab ----
-          tabPanel(
-            "By DHB",
-            uiOutput("chartTitle2"),
-            br(),
-            plotlyOutput("plotDHB", width = "1200px", height = "600px")
-            
-          )
-        )
-      ),
-      
+        ),
+
       
       #Ratio Item Outputs ----
 
           #Ratio Rates Tab ----
         conditionalPanel(condition = "input.items == 'ratio'",
-            uiOutput("chartTitle3"),
-            
-            br(),
-            
-          #   #Single ----
-          # conditionalPanel(condition = "input.ratioCompare1 == 'Single'",
-          #   plotlyOutput("rateRatioPlot", width = "800px"),
-          #   ),
-          
-            #Compare ----
-          # conditionalPanel(condition = "input.ratioCompare1 == 'Compare'",
-                           plotlyOutput("ratioComparsion", width = "800px")
-          
-          
-          ),
-      
-    
-      # conditionalPanel(condition = "input.items == 'ratio'",
-      #                  radioGroupButtons(inputId = "ratioCompare1",
-      #                                    label = "Plot View",
-      #                                    choices = c("Single", "Compare"),
-      #                                    selected = "Compare")),
-      hr(),
-      
-      #Text Information ----
-      fluidRow(column(12, 
-      uiOutput("textTitle"),
-       uiOutput("textMain"),
-      conditionalPanel(condition = "input.items == 'vacc'",
-       uiOutput("textERP"),
-       br(),
-        uiOutput("textHSU"),
-       br(),
-       
-       
-       
-       #Raw Data Tables ----
-       
-       uiOutput("rawDataTitle1"),
-       DTOutput("tableFull")
-      ),
-      conditionalPanel(condition = "input.items == 'ratio'",
-                       uiOutput("textRateRatios"),
-                       br(),
-                       uiOutput("rawDataTitle2"),
-                       DTOutput("tableRate")
-                       
-      )
-      
-      ))
 
-      
+            tabsetPanel(id = "tabRatio",
+                        tabPanel("Charts",
+                                 div(style = "margin-top: 10px;"),
+                                 
+                                 uiOutput("chartTitle3"),
+                                 br(),
+                                 plotlyOutput("ratioComparison", 
+                                              width = "1200px", height = "700px")
+                        ),
+                        tabPanel("Raw Data",
+                                 div(style = "margin-top: 10px;"),
+                                 
+                                 uiOutput("rawDataTitle2"),
+                                 DTOutput("tableRate")
+                        ),
+                        tabPanel("Brief Information",
+                                 div(style = "margin-top: 10px;"),
+                                 
+                                 fluidRow(column(12,
+                                 uiOutput("textRateRatios")))
+                        ),
+                        tabPanel("Download",
+                                 div(style = "margin-top: 10px;"),
+                                 uiOutput("downloadTextMain1"),
+                                 br(),
+                                 uiOutput("compareDataDownloadTitle"),
+                                 downloadButton("downloadRatioData", "Download Raw Data"),
+                                 
+                                 br(),
+                                 div(style = "margin-top: 20px;"),
+                                 uiOutput("compareChartDownloadTitle"),
+                                 downloadButton("downloadRatioPlot", "Download Plot"),
+                                 
+                                 br(),
+                                 div(style = "margin-top: 20px;"),
+                                 uiOutput("compareAllDownloadTitle"),
+                                 downloadButton("downloadAllDataRatio", "Download All Comparison Data")
+                                 
+                        )
+            )
+
+        )
+
+
     )
   )
