@@ -15,7 +15,9 @@
       sidebarMenu(
         id = "items",
         menuItem(tabName = "vacc", "Comparing HSU & ERP"),
-        menuItem(tabName = "ratio", "Comparing Ethnicities")
+        menuItem(tabName = "ratio", "Comparing Ethnicities"),
+        menuItem(tabName = "about", "About")
+        
       ),
       div(style = "margin-top: -10px;"),
       hr(),
@@ -33,7 +35,7 @@
         selectInput(
           inputId = "dateFull",
           label = "Select Date",
-          choices = c("2021-11-01",
+          choices = c(
                       "2023-01-17"),
           selected = "2021-11-01",
           selectize = F
@@ -127,7 +129,7 @@
         selectInput(
           inputId = "dateRatio",
           label = "Select Date",
-          choices = c("2021-11-01",
+          choices = c(
                       "2023-01-17"),
           selected = "2021-11-01",
           selectize = F
@@ -237,12 +239,30 @@
                       " )
         )
       ),
-      tags$head(tags$style( type = 'text/css',  'plotDHB { overflow-x: scroll; }')),
+      tags$head(
+        tags$style(
+          type = 'text/css',  'plotDHB { overflow-x: scroll; }')),
       
       # Add and edit text output
-      tags$head(tags$style("#graphTitle{color: black;
+      tags$head(
+      tags$style("#graphTitle{color: black;
                                  font-size: 20px;
                                  }")),
+      
+      tags$head(tags$style("#point1Text, #point2Text, 
+      #point3Text, #point4Text, #andText, #whereText, #whereText2
+      {margin-left:20px;")),
+      
+      tags$head(
+      tags$style("MathJax.Hub.Config({
+      jax: ['input/TeX","output/HTML-CSS'],
+      displayAlign: 'left'
+    })"
+      )),
+      
+#       HTML("div.MathJax_Display{
+#    text-align: left !important;
+# }")
       
       
       #Title ----
@@ -270,13 +290,13 @@
                              uiOutput("rawDataTitle1"),
                              DTOutput("tableFull")
                     ),
-                    tabPanel("Brief Information",
-                             div(style = "margin-top: 10px;"),
-                             
-                             fluidRow(column(12, 
-                                             uiOutput("textHSUvsERP")
-                                     
-                    ))),
+                    # tabPanel("Brief Information",
+                    #          div(style = "margin-top: 10px;"),
+                    #          
+                    #          fluidRow(column(12, 
+                    #                          uiOutput("textHSUvsERP")
+                    #                  
+                    # ))),
                     tabPanel("Download",
                              div(style = "margin-top: 10px;"),
                              uiOutput("downloadTextMain2"),
@@ -322,12 +342,12 @@
                                  uiOutput("rawDataTitle2"),
                                  DTOutput("tableRate")
                         ),
-                        tabPanel("Brief Information",
-                                 div(style = "margin-top: 10px;"),
-                                 
-                                 fluidRow(column(12,
-                                 uiOutput("textRateRatios")))
-                        ),
+                        # tabPanel("Brief Information",
+                        #          div(style = "margin-top: 10px;"),
+                        #          
+                        #          fluidRow(column(12,
+                        #          uiOutput("textRateRatios")))
+                        # ),
                         tabPanel("Download",
                                  div(style = "margin-top: 10px;"),
                                  uiOutput("downloadTextMain1"),
@@ -348,7 +368,32 @@
                         )
             )
 
-        )
+        ),
+      
+      #About Tab -----
+      conditionalPanel(condition = "input.items == 'about'",
+                       uiOutput("point1Title"),
+                       uiOutput("point1Text"),
+                       br(),
+                       uiOutput("point2Title"),
+                       uiOutput("point2Text"),
+                       br(),
+                       uiOutput("point3Title"),
+                       uiOutput("point3Text"),
+                       uiOutput("rateFormula"),
+                       uiOutput("whereText2"),
+                       uiOutput("rateFormula2"),
+                       br(),
+                       uiOutput("point4Title"),
+                       uiOutput("point4Text"),
+                       uiOutput("formula"),
+                       uiOutput("andText"),
+                       uiOutput("formula2"),
+                       uiOutput("whereText"),
+                       uiOutput("formula3"),
+                       br(),
+                       uiOutput("point5Title")
+      )
 
 
     )

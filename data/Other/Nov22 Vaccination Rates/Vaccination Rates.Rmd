@@ -128,6 +128,8 @@ ERP_TFVacc_nontot.df <- ERP_TFVacc_nontot.df %>%
     Rate_Gamma1Upr  = (0.5 * qchisq(1 - alpha / 2, 2 * (Count + 1)) / Weights)*100000
   )
 
+
+View(ERP_TFVacc_nontot.df)
 ```
 
 

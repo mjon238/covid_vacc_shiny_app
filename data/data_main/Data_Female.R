@@ -6,55 +6,24 @@ library(reshape2);
 library(patchwork);
 library(ggnewscale)
 
-## Creating weights for each population type ----
 
-## creating weights df
-# weights.df <- read_excel("Weights.xlsx", sheet = "HSU&ERP")
-# TFVacc_SFnontotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "TotalFullVacc")
-# MFVacc_SFnontotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "MaoriFullVacc")
-# NMFVacc_SFnontotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "MaoriFullVacc")
-# TFVacc_DHB_SFtotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "TotalFullVacc")
-# MFVacc_DHB_SFtotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "MaoriFullVacc")
-# NMFVacc_DHB_SFtotal.df <- read_excel("VaccinationDataR Updated HSU2021.xlsx", sheet = "MaoriFullVacc")
+#HSU total weights
+HSU_DHB.df <- weights$HSUf
 
+#ERP total weights
+ERP_DHB.df <- weights$ERPf
 
-# HSU total weights
-# using numbers
-HSUn.df <- weights.df[-c(2:12), ]
-HSUn.df <- pivot_longer(HSUn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights") # changing from rows to column
-HSUn.df <- HSUn.df[, c(3, 4)] # only showing weights by age-groups
+#HSU Māori weights
+HSUM_DHB.df <- weights$`HSUf Maori`
 
-# HSU Maori weights
-# using numbers
-HSUMn.df <- weights.df[-c(1:2, 4:12), ]
-HSUMn.df <- pivot_longer(HSUMn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights") # changing from rows to column
-HSUMn.df <- HSUMn.df[, c(3, 4)] # only showing weights by age-groups
+#ERP Maori weights
+ERPM_DHB.df <- weights$`ERPf Maori`
 
-# HSU NonMaori weights
-# using numbers
-HSUNMn.df <- weights.df[-c(1:4, 6:12), ]
-HSUNMn.df <- pivot_longer(HSUNMn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights") # changing from rows to column
-HSUNMn.df <- HSUNMn.df[, c(3, 4)] # only showing weights by age-groups
+#HSU NonMāori weights
+HSUNM_DHB.df <- weights$`HSUf NonMaori`
 
-
-# ERP total weights
-# using numbers
-ERPn.df <- weights.df[-c(1:6, 8:12), ]
-ERPn.df <- pivot_longer(ERPn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights") # changing from rows to column
-ERPn.df <- ERPn.df[, c(3, 4)] # only showing weights by age-groups
-
-# ERP Maori weights
-# using numbers
-ERPMn.df <- weights.df[-c(1:8, 10:12), ]
-ERPMn.df <- pivot_longer(ERPMn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights") # changing from rows to column
-ERPMn.df <- ERPMn.df[, c(3, 4)] # only showing weights by age-groups
-
-# ERP NonMaori weights
-# using numbers
-ERPNMn.df <- weights.df[-c(1:10, 12), ]
-ERPNMn.df <- pivot_longer(ERPNMn.df, cols = 3:20, names_to = "AgeGroup", values_to = "Weights") # changing from rows to column
-ERPNMn.df <- ERPNMn.df[, c(3, 4)] # only showing weights by age-groups
-
+#ERP NonMaori weights
+ERPNM_DHB.df <- weights$`ERPf NonMaori`
 
 
 
@@ -71,7 +40,7 @@ TFVacc_SFnontotal.df <- TFVacc_SFnontotal.df[, c(1, 4, 5, 3)] # rearranging colu
 # Using HSU Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-HSU_TFVacc_SFnontot.df <- left_join(TFVacc_SFnontotal.df, HSUn.df, by = "AgeGroup")
+HSU_TFVacc_SFnontot.df <- left_join(TFVacc_SFnontotal.df, HSU_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -99,7 +68,7 @@ HSU_TFVacc_SFnontot.df <- HSU_TFVacc_SFnontot.df %>%
 # Using ERP Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-ERP_TFVacc_SFnontot.df <- left_join(TFVacc_SFnontotal.df, ERPn.df, by = "AgeGroup")
+ERP_TFVacc_SFnontot.df <- left_join(TFVacc_SFnontotal.df, ERP_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -136,7 +105,7 @@ MFVacc_SFnontotal.df <- MFVacc_SFnontotal.df[, c(1, 4, 5, 3)] # rearranging colu
 # Using HSU Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-HSU_MFVacc_SFnontot.df <- left_join(MFVacc_SFnontotal.df, HSUMn.df, by = "AgeGroup")
+HSU_MFVacc_SFnontot.df <- left_join(MFVacc_SFnontotal.df, HSUM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -164,7 +133,7 @@ HSU_MFVacc_SFnontot.df <- HSU_MFVacc_SFnontot.df %>%
 # Using ERP Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-ERP_MFVacc_SFnontot.df <- left_join(MFVacc_SFnontotal.df, ERPMn.df, by = "AgeGroup")
+ERP_MFVacc_SFnontot.df <- left_join(MFVacc_SFnontotal.df, ERPM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -203,7 +172,7 @@ NMFVacc_SFnontotal.df <- NMFVacc_SFnontotal.df[,c(1,4,5,3)] #rearranging columns
 # Using HSU Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-HSU_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, HSUNMn.df, by = "AgeGroup")
+HSU_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, HSUNM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -232,7 +201,7 @@ HSU_NMFVacc_SFnontot.df <- HSU_NMFVacc_SFnontot.df %>%
 # Using ERP Weights
 
 ## Join on the standard population weights (adds in a column called "Weights")
-ERP_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, ERPNMn.df, by = "AgeGroup")
+ERP_NMFVacc_SFnontot.df <- left_join(NMFVacc_SFnontotal.df, ERPNM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Create a dataset for the total of each DHB (all age groups summed), doesn't include all DHB named 'Total'
@@ -276,7 +245,7 @@ TFVacc_DHB_SFtotal.df <- TFVacc_DHB_SFtotal.df[, c(1, 5, 6, 4)] # rearranging co
 # Using HSU Weights
 
 
-HSU_TFVacc_DHB_SFtot.df <- left_join(TFVacc_DHB_SFtotal.df, HSUn.df, by = "AgeGroup")
+HSU_TFVacc_DHB_SFtot.df <- left_join(TFVacc_DHB_SFtotal.df, HSU_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Calculate the age-specific rates for each age group for total regions
@@ -297,7 +266,7 @@ HSU_TFVacc_DHB_SFtot.df <- HSU_TFVacc_DHB_SFtot.df %>%
 # Using ERP Weights
 
 
-ERP_TFVacc_DHB_SFtot.df <- left_join(TFVacc_DHB_SFtotal.df, ERPn.df, by = "AgeGroup")
+ERP_TFVacc_DHB_SFtot.df <- left_join(TFVacc_DHB_SFtotal.df, ERP_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Calculate the age-specific rates for each age group for total regions
@@ -330,7 +299,7 @@ MFVacc_DHB_SFtotal.df <- MFVacc_DHB_SFtotal.df[, c(1, 5, 6, 4)] # rearranging co
 # Using HSU Weights
 
 
-HSU_MFVacc_DHB_SFtot.df <- left_join(MFVacc_DHB_SFtotal.df, HSUMn.df, by = "AgeGroup")
+HSU_MFVacc_DHB_SFtot.df <- left_join(MFVacc_DHB_SFtotal.df, HSUM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Calculate the age-specific rates for each age group for total regions
@@ -351,7 +320,7 @@ HSU_MFVacc_DHB_SFtot.df <- HSU_MFVacc_DHB_SFtot.df %>%
 # Using ERP Weights
 
 
-ERP_MFVacc_DHB_SFtot.df <- left_join(MFVacc_DHB_SFtotal.df, ERPMn.df, by = "AgeGroup")
+ERP_MFVacc_DHB_SFtot.df <- left_join(MFVacc_DHB_SFtotal.df, ERPM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Calculate the age-specific rates for each age group for total regions
@@ -384,7 +353,7 @@ NMFVacc_DHB_SFtotal.df <- NMFVacc_DHB_SFtotal.df[,c(1,5,6,4)] #rearranging colum
 # Using HSU Weights
 
 
-HSU_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, HSUNMn.df, by = "AgeGroup")
+HSU_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, HSUNM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Calculate the age-specific rates for each age group for total regions
@@ -406,7 +375,7 @@ HSU_NMFVacc_DHB_SFtot.df <- HSU_NMFVacc_DHB_SFtot.df %>%
 # Using ERP Weights
 
 
-ERP_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, ERPNMn.df, by = "AgeGroup")
+ERP_NMFVacc_DHB_SFtot.df <- left_join(NMFVacc_DHB_SFtotal.df, ERPNM_DHB.df, by = c("AgeGroup", "DHB"))
 
 
 ## Calculate the age-specific rates for each age group for total regions

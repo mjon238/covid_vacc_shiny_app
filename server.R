@@ -5,7 +5,8 @@ function(input, output) {
   output$graphTitle <- renderUI({
     title <- switch(input$items,
                     "vacc" = "HSU vs. ERP Data",
-                    "ratio" = "Comparisons")
+                    "ratio" = "Comparisons",
+                    "about" = "About")
     
     HTML("<b>",title,"</b> <br>")
   })
@@ -24,39 +25,6 @@ function(input, output) {
   
   
   
-  #Reactive Text -----
-  output$textHSUvsERP <- renderUI({
-    HTML("<font size='+1'><b> Brief Information </b></font>",
-         "<br> <b> HSU vs. ERP Data</b> compares NZ Vaccination Rates based on a unique population denominator, ERP and HSU.",
-         "<b> ERP </b>",
-         "<br><ul><li> \'Estimated Resident Population\'</li>",
-         "<li>Measured by Stats NZ</li>",
-         "<li>Updated regularly</li>",
-         "<li>Data is captured using Census</li>",
-         "<li></li>",
-         "</ul>",
-         "<b> HSU </b>",
-         "<br><ul><li> \'Health Service User (Population)\'</li>",
-         "<li>Measured by the Ministry of Helath</li>",
-         "<li>Measure of the population that interacts with the healthcare system</li>",
-         "<li>GP appointments, ED visits etc.</li>",
-         "<li>Gives location specific data</li>",
-         "<li>Misses a large proportion of the \'at-risk\' population</li>",
-         "</ul>")
-  })
-
-  output$textRateRatios <- renderUI({
-    
-    ethnicity <- c("Total", "Maori")
-
-    HTML("<font size='+1'><b> Brief Information </b></font>",
-         "<br> <b>Rate Ratios</b> acts as a means to compare vaccination rates between Maori and the General population.",
-         "<ul> <li> <b>Rate Ratio</b> measures the ERP vaccination rate divided by the HSU vaccination rate. </li>",
-         "<li> A Rate Ratio greater than 1 inidicates that the ERP vaccination rate is higher than the HSU. </li>",
-         "<li> <b>Rate Difference</b> measures the ERP vaccination rate minus the HSU vaccination rate.</li>",
-         "<li> <b>Count</b> measures the actual count of inidividuals vaccinated.</li></ul>")
-
-  })
   #Creating reactive values -----
   DHBSelected <- reactiveValues()
   
@@ -746,5 +714,84 @@ function(input, output) {
     }
   )
   
+  
+  
+  #About Text -----
+  
+  output$point1Title <- renderUI({
+    HTML("<b> What This Tool Does </b>")
+  })
+  output$point2Title <- renderUI({
+    HTML("<b> Key Terms </b>")
+  })
+  output$point3Title <- renderUI({
+    HTML("<b> Calculation of Rates </b>")
+  })
+  output$point4Title <- renderUI({
+    HTML("<b> Confidence Interval </b>")
+  })
+  output$point5Title <- renderUI({
+    HTML("<font size='+1'><b> Data Sources </font> </b>")
+  })
+  
+
+  output$point1Text <- renderUI({
+    HTML("<p> This shiny app is designed to illustrate the vaccination rate inequality based on two population measures, Health Service User Data (HSU) and Estimated Resident Population (ERP).<br> While for the Total population HSU and ERP population is relatively similar, HSU measures undercount the Maori population. In measuring vaccination rates, this leads to an inflated Maori vaccination rate. <br> The shiny app illustrates this effectively through a series of charts and data tables. </p>")
+  })
+  
+  output$point2Text <- renderUI({
+    HTML("<p> <b> Fully Vaccinated </b> is considered two doses of Pfizer Covid-19 Vaccines. </p> ",
+         
+         "<p> <b>ERP</b> stands for Estimated Resident Population. <br>This is a population measure taken by Stats NZ. It uses data from the latest census. ERP is a better reflection of New Zealands total population, by nationwide, DHB and Ethnicity. When examining DHB-wide or natiowide vaccination rates it is also more effective.  </p>",
+         
+         
+        "<p> <b>HSU</b> stands for Health Service User Data. <br> HSU population esimates count the number of people who received health services in a given year.  This data provides more location accurate population data relative to ERP.
+        This helps the Ministry of Health locate regions of lower-vaccination. 
+        However, people of low-socioeconomic groups, whom are more likely to be Maori, are less likely to use health serivces. 
+        They are effectively missing from this population count. Low-socioeconomic groups are also more likely to be unvaccinated, therefore these groups have an inflated vaccination rate (when using an HSU population denominator). This disparity is made evident in the app series of charts which indicate the Maori vaccination rate is inflated for an HSU population denominator relative to the ERP population denominator. But for the general population the HSU rate and ERP rate are approximately equivalent, or the ERP rate is greater.
+        </p>",
+        "<p> <b>Rate Ratio</b> is used to compare two rates, in this case the ERP vaccination rate and the HSU vaccination. <br>We divide the ERP rate by the HSU rate (ERP Rate / HSU Rate). </p>",
+        "<p> <b>Rate Difference </b> is also used to compare the ERP rate and HSU rate. <br>",
+        "Rate Difference involves subtracting the EPR rate from the HSU rate (ERP Rate - HSU Rate). </p>")
+  })
+  
+  output$point3Text <- renderUI({
+    HTML("Vaccination rates are calculated by taking a count of those vaccinated and dividing it by a population denominator, either HSU or ERP. These rates are then multiplied by 100 000 to reflect a rate per 100k (as seen in the charts). <br> A formula is below:")
+  })
+  output$rateFormula <- renderUI({
+    withMathJax(paste0("$$ = \\frac{n_i}{p_i}\\times k $$"))
+  })
+  output$rateFormula2 <- renderUI({
+    withMathJax(paste0("$$\\begin{aligned}&n_i = \\text{ the count of those fully vaccinated in each age group, } i (i = 1,2,..,n)\\text{ for a particular DHB} \\\\ & p_i = \\text{the total population in each age group, }i(i = 1,2,...,n) \\text{ for HSU or ERP} \\\\ & k = \\text{a constant, 100 000 in this case}\\end{aligned}$$"))
+  })
+
+  output$point4Text <- renderUI({
+   HTML("Confidence Intervals used in the App are Gamma Intervals. <br>",
+         "Gamma intervals perform better under low-count data, relative to the commonly used Keyfitz intervals. Keyfitz intervals are based on the poisson distribution. <br>",
+         "The formula for Gamma intervals is as follows:")
+    
+   
+    
+  })
+  output$formula <- renderUI({
+    withMathJax(paste0("$$L(y;v) = \\frac{v}{2y}(\\chi^2)^{-1}_{\\frac{2y^2}{v}}(\\frac{\\alpha}{2})$$"))
+  })
+  output$andText <- renderUI({
+    HTML("and")
+  })
+  output$formula2 <- renderUI({
+    withMathJax(paste0("$$U(y;v) = \\frac{v+w^2_M}{2(y+w_M)}(\\chi^2)^{-1}_{\\frac{2(y+w_M)^2}{v+w^2_M}}(1-\\frac{\\alpha}{2})$$"))
+  })
+  output$whereText <- output$whereText2 <- renderUI({
+    HTML("where")
+  })
+
+  output$formula3 <- renderUI({
+    
+    
+    withMathJax(paste0("$$\\begin{aligned}&v = Variance \\\\ & y = Rate \\\\ & w^2_M = E(\\frac{Weights}{Total}) \\\\ & y + w_M = Rate + E(\\frac{Weights}{Total}) \\\\ & \\alpha = 0.05\\end{aligned}$$"))
+  })
+    
+
   
 }
